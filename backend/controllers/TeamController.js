@@ -4,6 +4,7 @@ import Team from '../models/Team.js';
 import Teammember from "../models/TeamMembership.js";
 import Organization from "../models/Organization.js";
 import OrganizationMembership from "../models/OrganizationMembership.js";
+import User from "../models/User.js";
 
 
 // POST  /teams    Create a team and assign its Team Head
@@ -211,3 +212,213 @@ export const getTeamById = async (req, res) => {
     return res.status(500).json({ message: 'Failed to fetch team details' });
   }
 };
+
+
+const canManageTeam = async (team, userId) => {  //team is object
+  try{
+
+    const organizationMembership = await OrganizationMembership.findOne({organization_Id: team.organization_Id, user_Id: userId });
+
+    if(!organizationMembership) {
+      return false;
+    }
+
+    const teamMembership = await Teammember.findOne({team_Id: team._id, user_Id: userId})
+
+    const role = organizationMembership.role;
+    return ( role === 'Admin' || role === 'Owner' || teamMembership?.role === 'Head');
+
+  }
+  catch(err){
+    console.log(err);
+    return false;
+  }
+  
+};
+
+//POST
+
+export const addTeamMember = async(req,res) =>{
+
+  try{  
+    const {teamId} = req.params;
+    const {email} = req.body; 
+
+    if(typeof email !== 'string' || !email.trim()) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const team = await Team.findById(teamId);
+
+    if(!team){
+      return res.status(400).json({ message: 'Team not found' });
+    }
+
+    if( !(await canManageTeam(team, req.user._id)) ) {
+      return res.status(400).json({
+        message: 'You cannot manage this team',
+      });
+    }
+
+    const user = await User.findOne({ email: email.trim().toLowerCase()}).select('_id name email');
+
+    if(!user){
+      return res.status(400).json({message: 'User Not Found'});
+    }
+
+    const organizationMember = await OrganizationMembership.findOne({organization_Id : team.organization_Id , user_Id: user._id});
+
+    if(!organizationMember) {
+      return res.status(400).json({ message: 'User is not a organization member.'});
+    }
+
+    const teammembership = await Teammember.findOne({ team_Id: team._id, user_Id: user._id});
+
+    if(teammembership) {
+      return res.status(409).json({message: 'User is already a team member'});
+    }
+
+    const newMembership = await Teammember.create({team_Id: team._id , user_Id: user._id, role: 'Member'});
+
+    return res.status(201).json({ message: 'Team member added successfully',
+      membership: {
+        _id: newMembership._id,
+        team_Id: team._id,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+        role: newMembership.role,
+        joinedAt: newMembership.joinedAt,
+      }
+    });
+
+
+  }
+  catch (err) {
+    console.error('Add team member error:', err);
+    return res.status(500).json({ message: 'Failed to add team member' });
+  }
+
+}
+
+
+//DELETE
+
+export const removeTeamMember = async (req,res) =>{
+  try {
+    const {teamId,userId} = req.params;
+    
+    const team = await Team.findById(teamId);
+
+    if(!team){
+      return res.status(404).json({message:'Team not found'});
+    }
+
+    if (!(await canManageTeam(team, req.user._id))) {
+      return res.status(403).json({
+        message: 'You cannot manage this team',
+      });
+    }
+
+    const membership = await Teammember.findOne({team_Id: team._id, user_Id: userId});
+
+    if(!membership) {
+      return res.status(404).json({message:'Team membership not found'});
+    }
+
+    if(membership.role === 'Head') {
+      return res.status(400).json({
+        message: 'Team Head cannnot be removed.Transfer Head role first.',
+      });
+    }
+
+    await Teammember.deleteOne({ _id: membership._id });
+
+    return res.status(200).json({
+      message: 'Team member removed successfully',
+    });
+
+  }catch(err) {
+    console.error(err);
+    return res.status(500).json({ message:'Failed to remove team member'});
+  }
+};
+
+
+//Post
+
+export const changeTeamHead = async(req, res) =>{
+
+  const session = await mongoose.startSession();
+
+  try {
+    const {teamId} = req.params;
+    const {newHeadUserId} = req.body;
+
+    const team = await Team.findById(teamId);
+
+    if(!team) {
+      return res.status(404).json({message:'Team not found'});
+    }
+
+    const removerInfo = await OrganizationMembership.findOne({organization_Id : team.organization_Id, user_Id : req.user._id});
+    
+    if(!removerInfo || (removerInfo.role !== 'Admin' && removerInfo.role !== 'Owner')){
+      return res.status(400).json({message: "Only Admin or Owner can Change Head."})
+    };
+
+    const newHeadOrgMembership = await OrganizationMembership.findOne({organization_Id: team.organization_Id, user_Id: newHeadUserId});
+
+    if(!newHeadOrgMembership) {
+      return res.status(400).json({message: 'new Head must be Organization Member.'});
+    }
+
+    const newHeadUser = await User.findById(newHeadUserId).select('_id name email');
+
+    if(!newHeadUser){ 
+      return res.status(400).json({message: 'New Head User not found'});
+    }
+
+    await session.withTransaction(async () => {
+      // Demote the current Head
+      await Teammember.updateOne({team_Id: team._id, role: 'Head'},{$set:{role: 'Member'}},{session});
+
+      // Promote the new Head if already a member, otherwise add them.
+      await Teammember.findOneAndUpdate({team_Id: team._id,user_Id: newHeadUserId},
+        {
+          $set:{role:'Head'},
+          $setOnInsert:{
+            team_Id: team._id,
+            user_Id: newHeadUserId,
+            joinedAt: new Date(),
+          },
+        },
+        {
+          upsert: true,
+          runValidators: true,
+          session,
+        }
+      );
+    });
+
+    return res.status(200).json({
+      message: 'Team Head changed successfully',
+      teamId: team._id,
+      newHead: {
+        _id: newHeadUser._id,
+        name: newHeadUser.name,
+        email: newHeadUser.email,
+      },
+    });
+  }catch(err) {
+    console.error(err);
+    return res.status(500).json({message:'Failed to change Team Head'});
+  }finally{
+    await session.endSession();
+  }
+};
+
+
+

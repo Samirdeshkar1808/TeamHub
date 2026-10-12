@@ -4,6 +4,9 @@ import Organization from "../models/Organization.js";
 import OrganizationMembership from "../models/OrganizationMembership.js";
 
 
+import User from '../models/User.js';
+import Team from '../models/Team.js';
+import TeamMembership from '../models/TeamMembership.js';
 
 /* a transaction is a way to group multiple database operations into a single unit of work 
    so that either all operations succeed or all of them are rolled back.
@@ -124,15 +127,15 @@ export const getMyOrganizations = async(req,res) =>{
 };
 
 
-// GET  /organizations/:id
+// GET  /organizations/:organizationId
 
 export const getOrganizationById = async(req , res) =>{
 
     try{
 
-        const { id } = req.params;
+        const { organizationId } = req.params;
 
-        const membership = await OrganizationMembership.findOne({organization_Id: id, user_Id : req.user._id});
+        const membership = await OrganizationMembership.findOne({organization_Id: organizationId, user_Id : req.user._id});
 
         if(!membership) {
            return res.status(404).json({
@@ -140,7 +143,7 @@ export const getOrganizationById = async(req , res) =>{
            });
         }
 
-        const organization = await Organization.findById(id);
+        const organization = await Organization.findById(organizationId);
 
         if (!organization) {
             return res.status(404).json({
@@ -170,3 +173,157 @@ export const getOrganizationById = async(req , res) =>{
     }
 
 };
+
+//POST  //organisations/organizationId/members
+
+export const addOrganizationMember = async(req,res) =>{
+
+ try{
+
+    const {organizationId} = req.params;
+    const {email , role='Member'} = req.body;
+
+    if(!email || typeof email !== 'string'){
+        return res.status(400).json({
+            message : "Email and organization must be selected"
+        });
+    }
+
+    if(role !== 'Admin' && role !== 'Member'){
+        return res.status(400).json({message : "Role Not Available"});
+    }
+
+    const organization = await Organization.findById(organizationId);
+
+    if(!organization){
+        return res.status(400).json({
+            message : "organization do not exist"
+        });
+    }
+
+    const adderInfo = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : req.user._id});
+
+    if(!adderInfo || (adderInfo.role !== 'Admin' && adderInfo.role !== 'Owner')){
+        return res.status(400).json({
+            message : "Only Admin or Owner can Manage Members",
+        });
+    }
+
+    if(role === 'Admin' && adderInfo.role !== 'Owner'){ //only Owner can add Admin
+        return res.status(400).json({
+            message : "Only Owner can give Admin role",
+        });
+    }
+
+    const user = await User.findOne({email : email.trim().toLowerCase()}).select(' _id name email');
+
+    if(!user){
+      return res.status(400).json({
+        message: 'User Not Found',
+      });
+    }
+
+    const userExisted = await OrganizationMembership.findOne({ organization_Id: organizationId, user_Id: user._id});
+
+    if(userExisted){
+        return res.status(400).json({ message : "User is Already Existing in Organization"});
+    }
+
+    const membership = await OrganizationMembership.create({
+        organization_Id : organizationId,
+        user_Id : user._id,
+        role : role,
+    });
+
+    return res.status(200).json({
+      message: "Member added in Organization successfully",
+      membership: {
+        _id: membership._id,
+        organization_Id: membership.organization_Id,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+        role: membership.role,
+        joinedAt: membership.joinedAt,
+      },
+    });
+
+ }catch(err){
+
+    console.log(err);
+
+    return res.status(500).json({
+        message : "Failed to add user in organization."
+    })
+ }
+
+};
+
+
+export const removeOrganizationMember = async(req,res) =>{
+    try{
+        const {organizationId , userId} = req.params;
+
+        const removerInfo = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : req.user._id});
+
+        if(!removerInfo || (removerInfo.role !== 'Admin' && removerInfo.role !== 'Owner')){
+            return res.status(400).json({
+                message: "Only Admin or Owner can Remove members."
+            });
+        };
+
+        const targetUser = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : userId});
+
+        if(!targetUser){
+            return res.status(400).json({
+                message: "User is not a Organization Member."
+            });
+        }
+
+        if(targetUser.role === 'Admin' && removerInfo.role !== 'Owner'){
+            return res.status(400).json({message : "Only Owner can remove Admin"});
+        }
+
+        const session = await mongoose.startSession();
+
+        try{
+
+            await session.withTransaction(async () =>{
+
+                //find all teams in organization and delete users record from this teams
+
+                const organizationTeams = await Team.find({organization_Id: organizationId}).select('_id');
+                const teamIds = organizationTeams.map((team) => team._id);
+
+                const isHead = await TeamMembership.exists({team_Id:{ $in : teamIds}, user_Id: userId, role:'Head'});
+
+                if(isHead){
+                  return res.status(400).json({
+                    message: 'User is Team head , Cant be Removed , Change Team Head first.'
+                  });
+                }
+
+                await TeamMembership.deleteMany({user_Id : userId , team_Id : {$in : teamIds}} , {session});
+
+                await OrganizationMembership.deleteOne({_id : targetUser._id} , {session});
+            });
+
+        }
+        finally{
+            await session.endSession();
+        }
+
+        return res.status(200).json({
+            message: 'Organization member removed Successfully',
+        });
+    }
+    catch(err){
+        console.log(err);
+
+        return res.status(200).json({
+            message : "Error removing Member"
+        });
+    }
+}
