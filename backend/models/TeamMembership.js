@@ -16,6 +16,11 @@ const TeammemberSchema = new Schema({
         type : String,
         enum : ["Head" , "Member"],
         required : true,
+        default: 'Member',
+    },
+    joinedAt: {
+      type: Date,
+      default: Date.now,
     }
 },{timestamps:true});
 

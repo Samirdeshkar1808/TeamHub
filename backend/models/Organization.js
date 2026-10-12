@@ -11,8 +11,9 @@ const OrganizationSchema = new Schema({
     description:{
         type : String,
         maxlength : 200,
+        default: '',
     },
-    admin_Id : {
+    created_By : {
         type : Schema.Types.ObjectId,
         ref:"User",
         required : true
