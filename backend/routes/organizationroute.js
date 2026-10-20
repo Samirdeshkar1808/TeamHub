@@ -12,6 +12,7 @@ router.get('/' , authMiddleware , getMyOrganizations);
 
 router.get('/:organizationId' , authMiddleware , getOrganizationById);
 
+
 router.post('/:organizationId/members' , authMiddleware , addOrganizationMember);
 
 router.delete('/:organizationId/members/:userId' , authMiddleware , removeOrganizationMember);

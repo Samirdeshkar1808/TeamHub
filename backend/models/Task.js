@@ -17,12 +17,6 @@ const TaskSchema = new Schema(
       index: true,
     },
 
-    request_Id: {
-      type: Schema.Types.ObjectId,
-      ref: 'Request',
-      default: null,
-    },
-
     title: {
       type: String,
       required: true,
@@ -43,28 +37,31 @@ const TaskSchema = new Schema(
       required: true,
     },
 
-    assigned_To: {
-      type: Schema.Types.ObjectId,
+    assigned_To:{
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      default: null,
+      required : true,
     },
-
+    
     priority: {
       type: String,
       enum: ['Low', 'Medium', 'High', 'Urgent'],
       default: 'Medium',
+      required: true,
     },
 
     status: {
       type: String,
-      enum: ['Todo', 'In Progress', 'Done', 'Cancelled'],
+      enum: ['Todo', 'InProgress', 'Done', 'Cancelled'],
       default: 'Todo',
+      required: true,
     },
 
-    deadline: {
+    dueDate: {
       type: Date,
       default: null,
     },
+
 
     completedAt: {
       type: Date,
@@ -77,4 +74,6 @@ const TaskSchema = new Schema(
 TaskSchema.index({ team_Id: 1, status: 1, deadline: 1 });
 TaskSchema.index({ assigned_To: 1, status: 1 });
 
-export default mongoose.model('Task', TaskSchema);
+const Task =  mongoose.model('Task', TaskSchema);
+
+export default Task;

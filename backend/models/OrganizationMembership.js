@@ -35,4 +35,6 @@ OrganizationMemberSchema.index(
   { unique: true }
 );
 
-export default mongoose.model('OrganizationMember',OrganizationMemberSchema);
+const OrganizationMembership =  mongoose.model('OrganizationMember',OrganizationMemberSchema);
+
+export default OrganizationMembership;

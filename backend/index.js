@@ -7,6 +7,10 @@ import authroute from './routes/authroute.js';
 import organizationroute from './routes/organizationroute.js'
 import Teamroute from './routes/Teamroute.js';
 
+import Taskroutes from './routes/Taskroutes.js';
+import requestroutes from './routes/requestroutes.js';
+import dashboardroutes from './routes/dashboardroutes.js';
+
 dotenv.config();
 
 const app = express();
@@ -35,7 +39,13 @@ app.get( "/" ,(req,res)=>{
 app.use('/auth', authroute);
 app.use('/organizations', organizationroute);
 
-app.use('/organizations/:organizationId/teams' , Teamroute);
+app.use('/:organizationId/teams' , Teamroute);
+
+app.use('/tasks' , Taskroutes);
+
+app.use('/requests' , requestroutes);
+
+app.use('/dashboard' , dashboardroutes);
 
 
 app.get('/me', authMiddleware, (req, res) => {

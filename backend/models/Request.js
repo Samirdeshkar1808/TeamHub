@@ -10,13 +10,13 @@ const RequestSchema = new Schema(
       index: true,
     },
 
-    from_Team_Id: {
+    from_Team: {
       type: Schema.Types.ObjectId,
       ref: 'Team',
       required: true,
     },
 
-    to_Team_Id: {
+    to_Team: {
       type: Schema.Types.ObjectId,
       ref: 'Team',
       required: true,
@@ -51,7 +51,7 @@ const RequestSchema = new Schema(
       type: String,
       required: true,
       trim: true,
-      maxlength: 3000,
+      maxlength: 300,
     },
 
     priority: {
@@ -64,34 +64,52 @@ const RequestSchema = new Schema(
       type: String,
       enum: [
         'Pending',
-        'Accepted',
+        'Approved',
         'Rejected',
-        'In Progress',
-        'Needs Info',
+        'InProgress',
+        'Clarification',
         'Completed',
         'Cancelled',
       ],
       default: 'Pending',
+      required : true,
     },
 
     deadline: {
       type: Date,
       default: null,
     },
+    decision_By: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
 
-    review_Note: {
+    decision_At: {
+      type: Date,
+      default: null,
+    },
+
+    decision_Note: {
       type: String,
-      maxlength: 1000,
+      trim: true,
+      maxlength: 200,
       default: '',
     },
+
+    completedAt: {
+      type: Date,
+      default: null,
+    },
+
+
   },
   { timestamps: true }
 );
 
-RequestSchema.index({organization_Id: 1,status: 1,createdAt: -1,});
-RequestSchema.index({ from_Team_Id: 1, createdAt: -1 });
-RequestSchema.index({ to_Team_Id: 1, status: 1 });
-RequestSchema.index({ created_By: 1 });
-RequestSchema.index({ assigned_To: 1 });
+RequestSchema.index({ from_Team_Id: 1, status: 1,createdAt: -1 });
+RequestSchema.index({ to_Team_Id: 1, status: 1,createdAt: -1 });
 
-export default mongoose.model('Request', RequestSchema);
+const Request = mongoose.model('Request', RequestSchema);
+
+export default Request;

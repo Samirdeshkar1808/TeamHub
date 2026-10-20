@@ -179,7 +179,6 @@ export const getOrganizationById = async(req , res) =>{
 export const addOrganizationMember = async(req,res) =>{
 
  try{
-
     const {organizationId} = req.params;
     const {email , role='Member'} = req.body;
 
@@ -190,7 +189,7 @@ export const addOrganizationMember = async(req,res) =>{
     }
 
     if(role !== 'Admin' && role !== 'Member'){
-        return res.status(400).json({message : "Role Not Available"});
+        return res.status(400).json({message :"Role Not Available"});
     }
 
     const organization = await Organization.findById(organizationId);
