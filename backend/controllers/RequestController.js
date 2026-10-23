@@ -220,6 +220,32 @@ export const getRequestById = async (req, res) => {
   }
 };
 
+//GET  /requests/assigned-requests
+//it will show requests assigned to any User
+
+export const assignedRequests = async(req,res)=>{
+   
+  try{  
+    const requests = await Request.find({assigned_To : req.user._id}).populate('from_Team','name').populate('to_Team', 'name').populate('created_By', 'name email')
+                                       .sort({ createdAt: -1 }).lean();
+
+    if(!requests) {
+      return res.status(404).json({message:'Requests not found'});
+    }
+
+    return res.status(200).json({ 
+      requests,
+    });    
+  }
+  catch(err){
+    console.error(err);
+    return res.status(500).json({
+      message: 'Failed to fetch requests',
+    });
+
+  }
+}
+
 
 // PATCH  /requests/:requestId/decision
 // Recipient Team Head or organization Owner/Admin decides.
@@ -292,7 +318,6 @@ export const updateRequestStatus = async(req, res)=>{
   try{
     const {requestId} = req.params;
     const {status} = req.body;
-
     if(!['InProgress', 'Completed'].includes(status)) {
       return res.status(400).json({
         message: 'Status must be InProgress or Completed',
@@ -384,6 +409,69 @@ export const cancelRequest = async (req, res) => {
   }catch (err) {
     console.error(err);
     return res.status(500).json({message: 'Failed to cancel request'});
+  }
+};
+
+export const assignRequestMember = async (req, res) => {
+  try{
+    const { requestId } = req.params;
+    const { assigned_To } = req.body;
+    const userId = req.user._id;
+
+    const request = await Request.findById(requestId);
+
+    if(!request) {
+      return res.status(404).json({
+        message: "Request not found.",
+      });
+    }
+
+    // Only the recipient team's Head or an organization Owner/Admin can manage request assignments.
+    const team = Team.findById(request.to_Team);
+
+    const access = getAccess(team , userId);
+
+    if(!access.canManage){
+      return res.status(403).json({
+         message: 'Only the Team Head or organization Owner/Admin can assign requests',
+      });
+    }
+
+    // Assignment is allowed after approval and while work is in progress.
+    if (!["Approved", "InProgress"].includes(request.status)) {
+      return res.status(400).json({
+        message:
+          "Members can be assigned only after the request is approved.",
+      });
+    }
+
+    // assignee must belong to the team.
+    const membership = await Teammember.find({
+      team_Id: request.to_Team,
+      user_Id: assigned_To,
+    });
+
+    if (!membership) {
+      return res.status(400).json({
+        message: "Assigned member must belong to the receiving team."
+      });
+    }
+
+    request.assigned_To = assigned_To;
+    await request.save();
+
+    await request.populate("assigned_To","name email");
+
+    return res.status(200).json({
+      message: "Request members assigned successfully.",
+      request,
+    });
+  }catch (error) {
+    console.error("Assign request members error:", error);
+
+    return res.status(500).json({
+      message: "Failed to assign request members.",
+    });
   }
 };
 

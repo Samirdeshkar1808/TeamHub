@@ -1,18 +1,15 @@
 import express from 'express';
 
-const router = express.Router({mergeParams:true}); 
-//to access organizationId id here  because base route is '/:organizationId/teams'
+const router = express.Router(); 
 
 import authMiddleware from '../middleware/authmiddleware.js';
-import { createTeam , getTeams , getTeamById , addTeamMember , removeTeamMember , changeTeamHead} from '../controllers/TeamController.js';
+import { getTeamById , addTeamMember , removeTeamMember , changeTeamHead , getMyTeams} from '../controllers/TeamController.js';
 
 import { createTask , getTasks } from '../controllers/TaskController.js';
 
 import { createRequest, getRequests} from '../controllers/RequestController.js';
 
-
-router.post('/' , authMiddleware , createTeam);
-router.get('/' ,authMiddleware , getTeams);
+router.get('/' , authMiddleware , getMyTeams);
 router.get('/:teamId' , authMiddleware , getTeamById);
 router.post('/:teamId/members' , authMiddleware, addTeamMember);
 router.delete('/:teamId/members/:userId',authMiddleware , removeTeamMember);

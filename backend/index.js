@@ -10,6 +10,7 @@ import Teamroute from './routes/Teamroute.js';
 import Taskroutes from './routes/Taskroutes.js';
 import requestroutes from './routes/requestroutes.js';
 import dashboardroutes from './routes/dashboardroutes.js';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -31,6 +32,13 @@ mongoose.connect(DBURL)
 });
 
 
+//used to connect frontend and backend as both are on different ports.
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
+
+
 app.get( "/" ,(req,res)=>{
     console.log("Get is clicked");
     return res.send("Hello!")
@@ -39,7 +47,7 @@ app.get( "/" ,(req,res)=>{
 app.use('/auth', authroute);
 app.use('/organizations', organizationroute);
 
-app.use('/:organizationId/teams' , Teamroute);
+app.use('/teams' , Teamroute);
 
 app.use('/tasks' , Taskroutes);
 

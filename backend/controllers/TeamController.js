@@ -421,4 +421,32 @@ export const changeTeamHead = async(req, res) =>{
 };
 
 
+//Get   /teams
+
+export const getMyTeams = async(req,res) =>{
+
+  try{
+
+    const Teammemberships = await Teammember.find({user_Id : req.user._id}).populate('team_Id');
+
+    const teams = Teammemberships.filter((membership) => membership.team_Id)
+                                 .map((membership) =>({
+                                    id: membership.team_Id._id,
+                                    name: membership.team_Id.name,
+                                    description: membership.team_Id.description,
+                                    role: membership.role,
+                                    createdAt: membership.createdAt,
+                                  }));
+
+    return res.status(200).json({
+      teams
+    });
+  
+  }catch(err){
+    return res.status(400).json({
+      message : "Not Available"
+    })
+  }
+}
+
 

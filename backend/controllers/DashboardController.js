@@ -7,45 +7,37 @@ import OrganizationMembership from '../models/OrganizationMembership.js';
 import Organization from '../models/Organization.js';
 import Request from '../models/Request.js';
 
-// GET   /dashboard
+// GET   /dashboard/summary
 export const getDashboard = async (req, res) => {
   try{
     const userId = req.user._id;
-
-    const teamMemberships = await Teammember.find({user_Id: userId}).select('team_Id role').lean();
-
+    
+    const teamMemberships = await Teammember.find({user_Id: userId}).select('team_Id role description').lean();
     const teamIds = teamMemberships.map((membership) => membership.team_Id);
 
 
-    const organizationMemberships = await OrganizationMembership.find({user_Id: userId}).select('organization_Id role').lean();
+    const organizationMemberships = await OrganizationMembership.find({user_Id: userId}).select('organization_Id role description').lean();
     const organizationIds = organizationMemberships.map((membership) => membership.organization_Id);
 
     // Tasks assigned to the current user.
     const assignedTaskFilter = {assigned_To: userId};
     const now = new Date();
 
-    const [assignedTasks,todoTasks,inProgressTasks,blockedTasks,completedTasks,overdueTasks,myTeams,incomingRequests,outgoingRequests,] = 
-      await Promise.all([Task.countDocuments(assignedTaskFilter),  Task.countDocuments({...assignedTaskFilter,status: 'Todo'}),
-                         Task.countDocuments({...assignedTaskFilter,status: 'InProgress'}),Task.countDocuments({...assignedTaskFilter,status: 'Canceled'}),
-                         Task.countDocuments({...assignedTaskFilter,status: 'Done'}), Task.countDocuments({...assignedTaskFilter,status:{$ne:'Done'},dueDate:{$lt: now, $ne: null }}),
-                         Team.countDocuments({_id:{ $in: teamIds }}), Request.countDocuments({to_Team: { $in: teamIds },status: 'Pending'}),
-                         Request.countDocuments({from_Team: {$in: teamIds},status:{$in: ['Pending', 'Clarification','Approved', 'InProgress']}}),
+    const [assignedTasks,overdueTasks,myRequests] = 
+      await Promise.all([Task.countDocuments({...assignedTaskFilter ,status:{$in : ['Todo','InProgress']}}),
+                         Task.countDocuments({...assignedTaskFilter,status:{$ne:'Done'},dueDate:{$lt: now, $ne: null }}),
+                         Request.countDocuments({$or: [assignedTaskFilter,{created_By:userId}] }),
                         ]);
 
     return res.status(200).json({
       summary:{
         assignedTasks,
-        tasksByStatus: {
-          Todo: todoTasks,
-          InProgress: inProgressTasks,
-          Blocked: blockedTasks,
-          Done: completedTasks,
-        },
         overdueTasks,
-        myTeams,
-        incomingPendingRequests: incomingRequests,
-        activeOutgoingRequests: outgoingRequests,
+        myTeams : teamIds.length,
+        myRequests,
         myOrganizations: organizationIds.length,
+        teamMemberships,
+        organizationMemberships
       },
     });
   }catch(err){
@@ -63,9 +55,9 @@ export const getMyTasks = async (req, res) => {
     const userId = req.user._id;
 
     // Validate optional status filter.
-    const allowedStatuses = ['Todo','InProgress','Blocked','Done'];
+    const allowedStatuses = ['Todo','InProgress','Cancelled','Done'];
 
-    const {status,page = '1',limit = '10'} = req.query;
+    const {status} = req.query;
 
     if(status && !allowedStatuses.includes(status)) {
       return res.status(400).json({
@@ -74,40 +66,28 @@ export const getMyTasks = async (req, res) => {
       });
     }
 
-    // Validate pagination parameters.
-    const pageNumber = Number(page);
-    const pageSize = Number(limit);
-
-    if(!Number.isInteger(pageNumber) || !Number.isInteger(pageSize) || pageNumber < 1 || pageSize < 1 || pageSize > 100){
-      return res.status(400).json({
-        message: 'page must be >= 1 and limit must be between 1 and 100',
-      });
-    }
-
     // Always restrict results to tasks assigned to the logged-in user.
     const filter = { assigned_To: userId};
-    if(status){
-      filter.status = status
-    };
 
-    const skip = (pageNumber - 1) * pageSize;
-
-    const [tasks, totalTasks] = await Promise.all([
+    const [Alltasks, completedTasks , currTasks] = await Promise.all([
       Task.find(filter).populate('team_Id', 'name').populate('organization_Id', 'name').populate('created_By', 'name email')
-          .sort({ dueDate: 1, createdAt: -1 }).skip(skip).limit(pageSize).lean(),
+          .sort({ dueDate: 1, createdAt: -1 }).lean(),
 
-      Task.countDocuments(filter),
+      Task.countDocuments({...filter , status:'Done'}),
+      Task.countDocuments({...filter , status: { $ne: 'Done'}})
+     
     ]);
 
+    const filteredTasks = status ? Alltasks.filter(task => task.status === status): [];
+
     return res.status(200).json({
-      count: tasks.length,
-      totalTasks,
-      page: pageNumber,
-      limit: pageSize,
-      totalPages: Math.ceil(totalTasks / pageSize),
-      tasks,
+      Allcount: Alltasks.length,
+      Alltasks,
+      currTasks,
+      completedTasks,
+      filteredTasks,
     });
-  } catch (err) {
+  }catch(err) {
     console.error('Get my tasks error:', err);
 
     return res.status(500).json({

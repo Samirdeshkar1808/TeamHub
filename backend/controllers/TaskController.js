@@ -38,7 +38,7 @@ export const createTask = async (req , res) =>{
     const {teamId} = req.params;
     const {title , description='' , assigneduserId , priority='Medium', dueDate = null} = req.body;
     const userId = req.user._id;
-
+    console.log(title , assigneduserId);
     if(!title || !assigneduserId){
         return res.status(400).json({
             message : "Title is required and assigned to a member"
@@ -277,7 +277,7 @@ export const updateTaskStatus = async(req, res)=>{
     const {taskId} = req.params;
     const {status} = req.body;
 
-    if (!['Todo', 'InProgress', 'Blocked', 'Done'].includes(status)) {
+    if (!['Todo', 'InProgress', 'Cancelled', 'Done'].includes(status)) {
       return res.status(400).json({ message:'Invalid task status' });
     }
 
