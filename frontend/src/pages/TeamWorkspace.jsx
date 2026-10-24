@@ -6,6 +6,7 @@ import { ArrowLeft, ClipboardList, Send } from "lucide-react";
 import teamWorkspaceService from "../services/teamworkspaceService";
 import TeamTasksPanel from "../components/Teams/TeamTasksPanel";
 import TeamRequestsPanel from "../components/Teams/TeamRequestsPanel";
+import Sidebar from "../components/Sidebar";
 
 const tabs = [
   { id: "tasks", label: "Tasks", icon: ClipboardList },
@@ -77,7 +78,10 @@ export default function TeamWorkspace() {
   const members = teamData.members || [];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+   <div className="min-h-screen bg-slate-50 text-slate-900">
+    <Sidebar/>
+    
+    <div className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 sm:px-6 lg:pl-70">
       <Link
         to={`/teams/${teamId}`}
         className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900"
@@ -130,5 +134,6 @@ export default function TeamWorkspace() {
         <TeamRequestsPanel teamId={teamId} teamData={teamData} />
       )}
     </div>
+   </div>
   );
 }

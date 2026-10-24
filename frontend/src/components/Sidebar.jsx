@@ -1,12 +1,14 @@
 import {useState } from "react";
-import { Users, Settings, LogOut, X } from "lucide-react";
+import { Users, Settings, LogOut, X , Menu  } from "lucide-react";
 import { navigation } from "../config/dashboardConfig";
 import {useLocation, useNavigate } from "react-router-dom";
 
-export default function Sidebar({mobileOpen , setMobileOpen}){
+export default function Sidebar(){
 
   const navigate = useNavigate();
   const location = useLocation();
+
+   const [mobileOpen, setMobileOpen] = useState(false);
 
   function logout() {
     localStorage.removeItem("token");
@@ -14,10 +16,27 @@ export default function Sidebar({mobileOpen , setMobileOpen}){
     navigate("/login", {replace: true});
   }
 
-  const activePath = location.pathname.replace(/\/$/, "") || "/dashboard";
-  
+  const pathSegments = location.pathname.split("/").filter(Boolean); 
+  const activePath = pathSegments.length > 0 ? `/${pathSegments[0]}` : "/dashboard";
+
   return (
-    <>
+    <> 
+      <button
+        type="button"
+        aria-label="Open navigation"
+        onClick={() => setMobileOpen(true)}
+        className="flex rounded-lg p-2 gap-3 text-slate-600 hover:bg-slate-100 lg:hidden"
+      >
+        <Menu size={21} />
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white">
+          <Users size={21} strokeWidth={2} />
+        </div>
+
+        <span className="text-[21px] font-bold tracking-tight text-slate-900">
+            TeamHub
+        </span>
+      </button>
+
       {mobileOpen && (
         <button
           type="button"

@@ -11,27 +11,20 @@ import useDashboard from "../hooks/useDashboard";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [tab, setTab] = useState("teams");
 
   const {loading,error,summary,teams,organizations,user} = useDashboard();
   
   const firstName = user?.name?.trim()?.split(/\s+/)[0] || "there";
-  
+
   return(
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
-      <Sidebar 
-       mobileOpen={mobileOpen} 
-       setMobileOpen={setMobileOpen}
-      />
+      <Sidebar />
 
       <div className="min-h-screen lg:pl-64">
         <DashboardHeader
           user={user}
           navigate={navigate}
-          onOpenMenu={() => setMobileOpen(true)}
         />
 
         <main className="mx-auto max-w-[1600px] space-y-6 px-4 py-7 sm:px-7 lg:px-8 lg:py-8">

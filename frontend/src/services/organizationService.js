@@ -11,17 +11,15 @@ const organizationService = {
     return response.data;
   },
 
-  async getOrganizationById(organizationId) {
-    const response = await api.get(
-      `/organizations/${organizationId}`
+  async getOrganizationInfoById(organizationId) {
+    const response = await api.get(`dashboard/organization/${organizationId}`
     );
 
-    return response.data.organization ?? response.data;
+    return response.data;
   },
 
   async getTeams(organizationId) {
     const response = await api.get(`/organizations/${organizationId}/teams`);
-    console.log(response);
     return(
       response.data.teams ??
       response.data.data ??
