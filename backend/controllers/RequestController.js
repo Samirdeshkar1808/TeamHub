@@ -427,10 +427,9 @@ export const assignRequestMember = async (req, res) => {
     }
 
     // Only the recipient team's Head or an organization Owner/Admin can manage request assignments.
-    const team = Team.findById(request.to_Team);
+    const team = await Team.findById(request.to_Team);
 
-    const access = getAccess(team , userId);
-
+    const access = await getAccess(team , userId);
     if(!access.canManage){
       return res.status(403).json({
          message: 'Only the Team Head or organization Owner/Admin can assign requests',

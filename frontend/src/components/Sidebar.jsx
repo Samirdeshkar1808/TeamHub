@@ -1,7 +1,21 @@
+import {useState } from "react";
 import { Users, Settings, LogOut, X } from "lucide-react";
 import { navigation } from "../config/dashboardConfig";
+import {useLocation, useNavigate } from "react-router-dom";
 
-export default function Sidebar({activePath, navigate, mobileOpen, setMobileOpen, onLogout}){
+export default function Sidebar({mobileOpen , setMobileOpen}){
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login", {replace: true});
+  }
+
+  const activePath = location.pathname.replace(/\/$/, "") || "/dashboard";
+  
   return (
     <>
       {mobileOpen && (
@@ -73,7 +87,7 @@ export default function Sidebar({activePath, navigate, mobileOpen, setMobileOpen
 
           <button
             type="button"
-            onClick={onLogout}
+            onClick={logout}
             className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 hover:bg-red-50 hover:text-red-600"
           >
             <LogOut size={19} />

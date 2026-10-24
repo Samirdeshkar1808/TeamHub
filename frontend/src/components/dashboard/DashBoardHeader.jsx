@@ -1,4 +1,3 @@
-
 import { Search, Bell, Menu } from "lucide-react";
 
 export default function DashboardHeader({user, onOpenMenu, navigate }) {

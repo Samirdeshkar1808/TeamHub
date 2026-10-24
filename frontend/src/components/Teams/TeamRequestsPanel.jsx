@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from "react";
 import { Plus, RefreshCw, Send, ArrowDownLeft } from "lucide-react";
 import api from "../../services/axiosApi";
@@ -166,20 +165,36 @@ export default function TeamRequestsPanel({ teamId, teamData }) {
     return matchesDirection && matchesStatus;
   });
 
-  function getAssignedId(request) {
+function getAssignedMember(request) {
   const assigned = request.assigned_To;
 
-  // Supports both the old array response and the new single-user response.
-  if (Array.isArray(assigned)) {
-    const firstUser = assigned[0];
-    return typeof firstUser === "object"
-      ? firstUser?._id || ""
-      : firstUser || "";
+  if (!assigned) return null;
+
+  // Support legacy array responses.
+  const member = Array.isArray(assigned) ? assigned[0] : assigned;
+
+  if (!member) return null;
+
+  // Populated user object.
+  if (typeof member === "object") {
+    return {
+      id: member._id || "",
+      name: member.name || member.email || "Assigned member",
+    };
   }
 
-  return typeof assigned === "object"
-    ? assigned?._id || ""
-    : assigned || "";
+  // If the API returns only an ID, resolve it from team members.
+  const teamMember = (teamData?.members || []).find(
+    (item) => item.user?._id === member
+  );
+
+  return {
+    id: member,
+    name:
+      teamMember?.user?.name ||
+      teamMember?.user?.email ||
+      "Assigned member",
+  };
 }
 
 function updateAssignmentDraft(request) {
@@ -193,8 +208,12 @@ function updateAssignmentDraft(request) {
 }
 
 async function handleAssignMember(request) {
-  const assignedTo =
-    assignmentDrafts[request._id] ?? getAssignedId(request);
+  const assignedTo = assignmentDrafts[request._id];
+
+  if (!assignedTo) {
+    setError("Please select a team member.");
+    return;
+  }
 
   setAssigningRequestId(request._id);
   setError("");
@@ -513,55 +532,86 @@ async function handleAssignMember(request) {
                     )}
                   </div>
 
-                 {incoming && ["Approved", "InProgress"].includes(request.status) && (
-  <div className="w-full rounded-lg border border-gray-200 p-3 sm:w-64">
-    <p className="mb-2 text-sm font-semibold text-gray-800">
-      Assign member
-    </p>
+                 {incoming &&
+  ["Approved", "InProgress"].includes(request.status) &&
+  (() => {
+    const assignedMember = getAssignedMember(request);
 
-    <p className="mb-2 text-xs text-gray-500">
-      Select one team member responsible for this request.
-    </p>
+    // Already assigned
+    if(assignedMember) {
+      return (
+        <div className="w-full rounded-lg border border-green-200 bg-green-50 p-3 sm:w-64">
+          <p className="mb-2 text-xs font-medium text-green-700">
+            Assigned member
+          </p>
 
-    <select
-      value={
-        assignmentDrafts[request._id] ?? getAssignedId(request)
-      }
-      onChange={(event) =>
-        setAssignmentDrafts((current) => ({
-          ...current,
-          [request._id]: event.target.value,
-        }))
-      }
-      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
-    >
-      <option value="">Unassigned</option>
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-100 text-sm font-semibold text-green-800">
+              {assignedMember.name.charAt(0).toUpperCase()}
+            </div>
 
-      {(teamData?.members || [])
-        .filter((member) => member.user?._id)
-        .map((member) => (
-          <option
-            key={member.user._id}
-            value={member.user._id}
-          >
-            {member.user.name || member.user.email}
-            {member.role === "Head" ? " (Head)" : ""}
-          </option>
-        ))}
-    </select>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-gray-900">
+                {assignedMember.name}
+              </p>
+              
+            </div>
+          </div>
+        </div>
+      );
+    }
 
-    <button
-      onClick={() => handleAssignMember(request)}
-      disabled={assigningRequestId === request._id}
-      className="mt-3 w-full rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60"
-    >
-      {assigningRequestId === request._id
-        ? "Saving..."
-        : "Save assignment"}
-    </button>
-  </div>
-)}
+    return (
+      <div className="w-full rounded-lg border border-gray-200 p-3 sm:w-64">
+        <p className="mb-2 text-sm font-semibold text-gray-800">
+          Assign member
+        </p>
 
+        <p className="mb-2 text-xs text-gray-500">
+          Select one team member responsible for this request.
+        </p>
+
+        <select
+          value={assignmentDrafts[request._id] ?? ""}
+          onChange={(event) =>
+            setAssignmentDrafts((current) => ({
+              ...current,
+              [request._id]: event.target.value,
+            }))
+          }
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+        >
+          <option value="">Select a member</option>
+
+          {(teamData?.members || [])
+            .filter((member) => member.user?._id)
+            .map((member) => (
+              <option
+                key={member.user._id}
+                value={member.user._id}
+              >
+                {member.user.name || member.user.email}
+                {member.role === "Head" ? " (Head)" : ""}
+              </option>
+            ))}
+        </select>
+
+        <button
+          type="button"
+          onClick={() => handleAssignMember(request)}
+          disabled={
+            !assignmentDrafts[request._id] ||
+            assigningRequestId === request._id
+          }
+          className="mt-3 w-full rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {assigningRequestId === request._id
+            ? "Saving..."
+            : "Save assignment"}
+        </button>
+      </div>
+    );
+  })()}
 
                   <div className="flex shrink-0 flex-wrap items-center gap-2 sm:flex-col sm:items-end">
                     {incoming && request.status === "Pending" && (

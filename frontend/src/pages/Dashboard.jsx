@@ -18,24 +18,13 @@ export default function Dashboard() {
 
   const {loading,error,summary,teams,organizations,user} = useDashboard();
   
-  function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login", {replace: true});
-  }
-
   const firstName = user?.name?.trim()?.split(/\s+/)[0] || "there";
-
-  const activePath = location.pathname.replace(/\/$/, "") || "/dashboard";
-
+  
   return(
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
-      <Sidebar
-        activePath={activePath}
-        navigate={navigate}
-        mobileOpen={mobileOpen}
-        setMobileOpen={setMobileOpen}
-        onLogout={logout}
+      <Sidebar 
+       mobileOpen={mobileOpen} 
+       setMobileOpen={setMobileOpen}
       />
 
       <div className="min-h-screen lg:pl-64">
@@ -53,7 +42,7 @@ export default function Dashboard() {
               </h1>
 
               <p className="mt-2 text-sm text-slate-500 sm:text-base">
-                Here's what's happening in your workspace today.
+                Here's what Assigned to your workspace today.
               </p>
             </div>
 
@@ -81,7 +70,6 @@ export default function Dashboard() {
             navigate={navigate}
           />
 
-          <section className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[1.1fr_0.9fr]">
             <TeamOrganizationPanel
               teams={teams}
               organizations={organizations}
@@ -90,9 +78,9 @@ export default function Dashboard() {
               navigate={navigate}
               loading={loading}
             />
+      
 
-            <QuickActions navigate={navigate} />
-          </section>
+          <QuickActions navigate={navigate} />
         </main>
       </div>
     </div>
