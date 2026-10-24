@@ -176,12 +176,12 @@ export const getTeamDashboard = async (req, res) => {
 
 //Get   /dashboard/organization/:organizationId
 
-export const getOrganizationDashboard = async(req, res) => {
+export const getOrganizationInfo = async(req, res) => {
   try{
     const {organizationId} = req.params;
     const userId = req.user._id;
 
-    const organization = await Organization.findById(organizationId).select('_id name');
+    const organization = await Organization.findById(organizationId);
 
     if(!organization){
       return res.status(404).json({
@@ -191,54 +191,17 @@ export const getOrganizationDashboard = async(req, res) => {
 
     const membership = await OrganizationMembership.findOne({organization_Id: organization._id,user_Id: userId}).lean();
 
-    if (!membership || !['Owner', 'Admin'].includes(membership.role)) {
+    if(!membership || !['Owner', 'Admin'].includes(membership.role)) {
       return res.status(403).json({
         message: 'Only the organization Owner or Admin can view this dashboard',
       });
     }
 
-    const teams = await Team.find({organization_Id: organization._id}).select('_id name');
-
-    const teamIds = teams.map((team) => team._id);
-    const now = new Date();
-
-    const [totalMembers,totalTasks,todoTasks,inProgressTasks,blockedTasks,completedTasks,overdueTasks,incomingPendingRequests,outgoingActiveRequests] =
-     await Promise.all([
-      OrganizationMembership.countDocuments({organization_Id: organization._id}),
-      Task.countDocuments({team_Id: { $in: teamIds }}),
-      Task.countDocuments({team_Id: { $in: teamIds },status: 'Todo'}),
-      Task.countDocuments({team_Id: { $in: teamIds },status: 'InProgress'}),
-      Task.countDocuments({team_Id: { $in: teamIds },status: 'Blocked'}),
-      Task.countDocuments({team_Id: { $in: teamIds },status: 'Done'}),
-      Task.countDocuments({team_Id: { $in: teamIds },status: { $ne: 'Done' },dueDate: { $lt: now, $ne: null }}),
-
-      Request.countDocuments({organization_Id: organization._id,status: 'Pending'}),
-      Request.countDocuments({organization_Id: organization._id,status: { $in: ['Pending','Clarification','Approved','InProgress']}}),
-    ]);
+    const members = await OrganizationMembership.find({organization_Id: organization._id}).populate("user_Id" , "name email").select("user_Id role joinedAt");
 
     return res.status(200).json({
-      organization:{
-        id: organization._id,
-        name: organization.name,
-      },
-      dashboard:{
-        totalTeams: teams.length,
-        totalMembers,
-        tasks:{
-          total: totalTasks,
-          byStatus:{
-            Todo: todoTasks,
-            InProgress: inProgressTasks,
-            Blocked: blockedTasks,
-            Done: completedTasks,
-          },
-          overdue: overdueTasks,
-        },
-        requests:{
-          incomingPending: incomingPendingRequests,
-          outgoingActive: outgoingActiveRequests,
-        },
-      },
+      organization,
+      members,
     });
   } catch (err) {
     console.error('Get organization dashboard error:', err);

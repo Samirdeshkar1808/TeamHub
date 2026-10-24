@@ -5,6 +5,7 @@ import { AlertCircle, LoaderCircle, Plus, RefreshCw, Search, UsersRound } from "
 import teamService from "../services/teamService";
 import TeamCard from "../components/Teams/TeamCard";
 import CreateTeamModal from "../components/Teams/CreateTeamModal";
+import Sidebar from "../components/Sidebar";
 
 function Teams() {
   const navigate = useNavigate();
@@ -139,7 +140,10 @@ function Teams() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+      <Sidebar/>
+
+      <main className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 sm:px-6 lg:pl-70">
         <div className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
             <p className="flex items-center gap-2 text-sm text-gray-500">

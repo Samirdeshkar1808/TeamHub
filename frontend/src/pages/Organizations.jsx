@@ -6,6 +6,7 @@ import organizationService from "../services/organizationService";
 import OrganizationHeader from "../components/organizations/OrganizationHeader";
 import OrganizationList from "../components/organizations/OrganizationList";
 import OrganizationForm from "../components/organizations/OrganizationForm";
+import Sidebar from "../components/Sidebar";
 
 function Organizations() {
   const navigate = useNavigate();
@@ -71,7 +72,10 @@ function Organizations() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+      <Sidebar/>
+
+      <main className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 sm:px-6 lg:pl-70">
         <OrganizationHeader
           onCreate={() => setShowCreateForm(true)}
           onRefresh={() => loadOrganizations(true)}

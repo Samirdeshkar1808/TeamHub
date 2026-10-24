@@ -1,17 +1,8 @@
 import { Search, Bell, Menu } from "lucide-react";
 
-export default function DashboardHeader({user, onOpenMenu, navigate }) {
+export default function DashboardHeader({user,navigate }) {
   return (
     <header className="sticky top-0 z-30 flex h-[74px] items-center gap-4 border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-7">
-      <button
-        type="button"
-        aria-label="Open navigation"
-        onClick={onOpenMenu}
-        className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
-      >
-        <Menu size={21} />
-      </button>
-
       <div className="relative max-w-[510px] flex-1">
         <Search
           size={19}

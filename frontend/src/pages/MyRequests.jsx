@@ -10,6 +10,7 @@ import SummaryCard  from "../components/myRequests/SummaryCard";
 import ActionButton from "../components/myRequests/ActionButton";
 import EmptyState from "../components/myRequests/EmptyState";
 import ErrorBanner from "../components/myRequests/ErrorBanner";
+import Sidebar from "../components/Sidebar";
 
 
 export default function MyRequests() {
@@ -137,7 +138,8 @@ export default function MyRequests() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <Sidebar/>
+      <main className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 sm:px-6 lg:pl-70">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="mb-2 flex items-center gap-2 text-sm font-medium text-blue-700">

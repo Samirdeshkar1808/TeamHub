@@ -17,6 +17,7 @@ import { FILTERS , PRIORITIES , STATUSES , STATUS_LABELS } from "../config/tasks
 import { formatDate , isOverdue , getErrorMessage} from "../utils/myTasksHelper";
 import SummaryCard  from "../components/myTasks/SummaryCard";
 import TasksHeader from "../components/myTasks/TasksHeader";
+import Sidebar from "../components/Sidebar";
 
 export default function MyTasks(){
 
@@ -146,7 +147,8 @@ export default function MyTasks(){
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <Sidebar/>
+      <main className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 sm:px-6 lg:pl-70">
 
         {/* Page heading */}
         <TasksHeader 

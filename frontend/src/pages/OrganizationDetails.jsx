@@ -1,9 +1,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Building2, CalendarDays, Users, UsersRound, AlertCircle, LoaderCircle, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Building2, CalendarDays, User, UsersRound, AlertCircle, LoaderCircle, ShieldCheck , ChevronDown , ChevronUp} from "lucide-react";
 
 import organizationService from "../services/organizationService";
+import Sidebar from "../components/Sidebar";
 
 function OrganizationDetails() {
   const { organizationId } = useParams();
@@ -15,34 +16,28 @@ function OrganizationDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [activeTab, setActiveTab] = useState(null);
+
+  const toggleView = (tab) => {
+    setActiveTab(activeTab === tab ? null : tab);
+  };
+
   const loadDetails = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
       const [org, allTeams] = await Promise.all([
-        organizationService.getOrganizationById(organizationId),
+        organizationService.getOrganizationInfoById(organizationId),
         organizationService.getTeams(organizationId).catch(() => []),
       ]);
 
-      console.log(org);
+      console.log(org.members);
       console.log(allTeams);
 
-      setOrganization(org);
-
-      const organizationTeams = Array.isArray(allTeams)
-        ? allTeams.filter((team) => {
-            const teamOrgId =
-              team.organization_Id?.id ||
-              team.organization_Id?._id ||
-              team.organization_Id ||
-              team.organizationId;
-
-            return String(teamOrgId) === String(organizationId);
-          })
-        : [];
-
+      setOrganization(org.organization);
       setTeams(allTeams);
+      setMembers(org.members);
     }catch(err) {
       setError(
         err.response?.data?.message ||
@@ -101,7 +96,9 @@ function OrganizationDetails() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+      <Sidebar/>
+      <main className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 sm:px-6 lg:pl-70">
         <button
           onClick={() => navigate("/organizations")}
           className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-indigo-600"
@@ -173,61 +170,102 @@ function OrganizationDetails() {
                   </p>
                 </div>
               </div>
+              <div className="mt-4 pt-3 border-t border-gray-100">
+            <button
+              onClick={() => toggleView('teams')}
+              className="w-full flex items-center justify-between text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+            >
+              <span>{activeTab === 'teams' ? 'Hide Teams' : 'View All Teams'}</span>
+              {activeTab === 'teams' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+          </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-white p-5">
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
+                 <User size={21} />
+                </div>
+                <div>
+                 <p className="text-sm text-gray-500">Total Members</p>
+                 <p className="mt-1 text-2xl font-bold text-gray-900">
+                 {members.length}
+                 </p>
+                </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-gray-100">
+            <button
+              onClick={() => toggleView('members')}
+              className="w-full flex items-center justify-between text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+            >
+              <span>{activeTab === 'members' ? 'Hide Members' : 'View All Members'}</span>
+              {activeTab === 'members' ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+          </div>
             </div>
 
           </div>
         </section>
 
-        <section className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900">Teams</h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Teams belonging to {organizationName}.
-          </p>
-
-          {teams.length > 0 ? (
-            <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {activeTab === 'teams' && (
+        <div className="mt-4 rounded-2xl border border-blue-100 bg-blue-50/30 p-5 transition-all">
+          <h3 className="text-md font-semibold text-gray-900 mb-3">Teams</h3>
+          {teams.length === 0 ? (
+            <p className="text-sm text-gray-500">No teams found.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {teams.map((team) => (
-                <div
-                  key={team._id}
-                  className="rounded-2xl border border-gray-200 bg-white p-5"
-                >
+                <div key={team._id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                   <div className="flex items-center gap-3">
                     <div className="rounded-xl bg-gray-100 p-3 text-gray-600">
                       <UsersRound size={20} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {team.name}
-                      </h3>
+                      <h4 className="font-semibold text-gray-800">{team.name}</h4>
                     </div>
                   </div>
-
-                  {team.description && (
-                    <p className="mt-4 line-clamp-3 text-sm leading-6 text-gray-500">
-                      {team.description}
-                    </p>
-                  )}
-                  
-                  <div>
-                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-gray-600">
-                      <span className="text-gray-700">Team Head</span> : {team.head?.name} ({team.head?.email})
-                    </p>
+                  <p className="text-sm text-gray-600 mt-1">{team.description}</p>
+                  <div className="mt-3 pt-2 border-t border-gray-100 text-xs text-gray-500">
+                    <span className="font-medium text-gray-700">Team Head:</span> {team.head.name} ({team.head.email})
                   </div>
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'members' && (
+        <div className="mt-4 rounded-2xl border border-indigo-100 bg-indigo-50/30 p-5 transition-all">
+          <h3 className="text-md font-semibold text-gray-900 mb-3">Members Breakdown</h3>
+          {members.length === 0 ? (
+            <p className="text-sm text-gray-500">No members found.</p>
           ) : (
-            <div className="mt-5 rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
-              <UsersRound className="mx-auto text-gray-400" size={32} />
-              <h3 className="mt-3 font-medium text-gray-900">
-                No teams found
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Teams will appear here when they are available in this organization.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {members.map((member) => (
+                <div key={member._id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+                  
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-xl bg-gray-100 p-3 text-gray-600">
+                        <User size={20} />
+                      </div>
+                      <div>
+                       <h4 className="font-semibold text-gray-800 mt-1">{member.user_Id.name}</h4>
+                      </div>
+                      <div>
+                       <p className="text-xs text-gray-600 font-medium uppercase tracking-wider mt-1.5">{member.role}</p>
+                      </div>
+                    </div>
+
+                    <p className="text-xs px-2 text-gray-600 font-medium  mt-2">Email : {member.user_Id.email}</p>
+                
+                
+                </div>
+              ))}
             </div>
           )}
-        </section>
+        </div>
+      )}
       </main>
     </div>
   );

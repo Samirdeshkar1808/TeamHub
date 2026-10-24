@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {ArrowLeft,AlertCircle,Crown,LoaderCircle,MailPlus,RefreshCw,ShieldCheck,Trash2,Users, BriefcaseBusiness } from "lucide-react";
 import teamService from "../services/teamService";
+import Sidebar from "../components/Sidebar";
 
 function TeamDetails() {
   const { teamId } = useParams();
@@ -195,7 +196,10 @@ function TeamDetails() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+
+      <Sidebar/>
+
+      <main className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 sm:px-6 lg:pl-70">
         <Link
           to="/teams"
           className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-indigo-600"
