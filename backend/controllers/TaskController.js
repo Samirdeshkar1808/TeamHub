@@ -34,7 +34,6 @@ const getAccess = async (team , userId) =>{
 export const createTask = async (req , res) =>{
 
   try{
-
     const {teamId} = req.params;
     const {title , description='' , assigneduserId , priority='Medium', dueDate = null} = req.body;
     const userId = req.user._id;
@@ -348,6 +347,45 @@ export const deleteTask = async(req, res)=>{
     return res.status(500).json({message:'Failed to delete task'});
   }
 };
+
+
+//GET   /dashboard/:organizationId
+ //only for admin , owner
+
+export const getAllTasks = async (req,res)=>{
+
+  try{
+
+    const userId = req.user._id;
+    const {organizationId} = req.params; 
+
+    const membership = await OrganizationMembership.findOne({organization_Id:organizationId , user_Id : userId});
+
+    if(!membership){
+      return res.status(400).json({
+        message : "Organization Membership Not Found"
+      });
+    }
+
+    if(!['Owner', 'Admin'].includes(membership.role)){
+      return res.status(403).json({
+        message : "All Tasks Can be Accessed by Owner and Admin only."
+      });
+    }
+
+    const allTasks = await Task.find({organization_Id: organizationId}).populate('team_Id' , 'name').populate('organization_Id', 'name').populate('created_By' , 'name');
+
+    return res.status(200).json({
+      allTasks
+    });
+  }
+  catch(err){
+    return res.status(400).json({
+      message : "Failed to fetch All Tasks"
+    })
+  }
+
+}
 
 
 
