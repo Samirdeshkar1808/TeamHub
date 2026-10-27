@@ -1,5 +1,5 @@
 import {useState } from "react";
-import {useLocation, useNavigate } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
@@ -7,15 +7,42 @@ import SummaryCards from "../components/dashboard/SummaryCards";
 import TeamOrganizationPanel from "../components/dashboard/TeamOrganizationPanel";
 import QuickActions from "../components/dashboard/QuickActions";
 
-import useDashboard from "../hooks/useDashboard";
+import { useCallback } from "react";
+import { fetchDashboardData } from "../services/dashboardService";
+import { useEffect } from "react";
 
 export default function Dashboard() {
+  const [summary , setSummary] = useState({});
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
   const [tab, setTab] = useState("teams");
 
-  const {loading,error,summary,teams,organizations,user} = useDashboard();
+  const loadSummary = useCallback(async ()=>{
+    setLoading(true);
+    setError("");
+
+    try{
+      const results = await fetchDashboardData();
+      if(results.err) {
+        throw new Error(results.err.message || "Failed to fetch dashboard data");
+      }
+      setSummary(results.data.summary);
+    }
+    catch(err){
+      setError(err.message || "Unable to load dashboard information.");
+    }
+    finally{
+      setLoading(false);
+    }
+  } , []);
+
+  useEffect(()=>{
+   loadSummary()
+  },[loadSummary]);
   
-  const firstName = user?.name?.trim()?.split(/\s+/)[0] || "there";
+  const firstName = summary.user?.name?.trim()?.split(/\s+/)[0] || "there";
 
   return(
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
@@ -23,7 +50,7 @@ export default function Dashboard() {
 
       <div className="min-h-screen lg:pl-64">
         <DashboardHeader
-          user={user}
+          user={summary.user}
           navigate={navigate}
         />
 
@@ -64,8 +91,7 @@ export default function Dashboard() {
           />
 
             <TeamOrganizationPanel
-              teams={teams}
-              organizations={organizations}
+              summary={summary}
               tab={tab}
               setTab={setTab}
               navigate={navigate}

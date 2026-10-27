@@ -1,5 +1,3 @@
-import mongoose from 'mongoose';
-
 import Task from '../models/Task.js';
 import Team from '../models/Team.js';
 import Teammember from '../models/TeamMembership.js';
@@ -12,32 +10,32 @@ export const getDashboard = async (req, res) => {
   try{
     const userId = req.user._id;
     
-    const teamMemberships = await Teammember.find({user_Id: userId}).select('team_Id role description').lean();
-    const teamIds = teamMemberships.map((membership) => membership.team_Id);
+    const teamMemberships = await Teammember.find({user_Id: userId}).select('team_Id role').populate('team_Id' , 'name description').lean();
 
-
-    const organizationMemberships = await OrganizationMembership.find({user_Id: userId}).select('organization_Id role description').lean();
-    const organizationIds = organizationMemberships.map((membership) => membership.organization_Id);
+    const organizationMemberships = await OrganizationMembership.find({user_Id: userId}).select('organization_Id role').populate('organization_Id' , 'name description').lean();
 
     // Tasks assigned to the current user.
-    const assignedTaskFilter = {assigned_To: userId};
     const now = new Date();
 
     const [assignedTasks,overdueTasks,myRequests] = 
-      await Promise.all([Task.countDocuments({...assignedTaskFilter ,status:{$in : ['Todo','InProgress']}}),
-                         Task.countDocuments({...assignedTaskFilter,status:{$ne:'Done'},dueDate:{$lt: now, $ne: null }}),
-                         Request.countDocuments({$or: [assignedTaskFilter,{created_By:userId}] }),
+      await Promise.all([Task.countDocuments({assigned_To : req.user._id ,status:{$in : ['Todo','InProgress']}}),
+                         Task.countDocuments({assigned_To : req.user._id ,status:{$ne:'Done'},dueDate:{$lt: now, $ne: null }}),
+                         Request.countDocuments({assigned_To : req.user._id , status:{$nin : ['Completed' , 'Cancelled' , 'Rejected']} }),
                         ]);
 
     return res.status(200).json({
       summary:{
         assignedTasks,
         overdueTasks,
-        myTeams : teamIds.length,
+        myTeams : teamMemberships.length,
         myRequests,
-        myOrganizations: organizationIds.length,
+        myOrganizations: organizationMemberships.length,
         teamMemberships,
-        organizationMemberships
+        organizationMemberships,
+        user : {
+          name : req.user.name,
+          email : req.user.email,
+        }
       },
     });
   }catch(err){

@@ -25,8 +25,7 @@ export const navigation = [
 export const summaryCards = [
   {
     label: "My Tasks",
-    key: "myTasks",
-    fallbackKeys: ["totalTasks", "assignedTasks"],
+    key: "assignedTasks",
     icon: CheckCircle2,
     color: "blue",
     path: "/my-tasks",
@@ -36,31 +35,21 @@ export const summaryCards = [
   {
     label: "My Requests",
     key: "myRequests",
-    fallbackKeys: ["totalRequests", "requests"],
     icon: ArrowLeftRight,
     color: "purple",
     path: "/my-requests",
-    noteKey: "pendingRequests",
-    note: "pending",
   },
   {
     label: "My Teams",
-    key: "myTeams",
-    fallbackKeys: ["teamsCount", "teamCount"],
     icon: Users,
     color: "green",
     path: "/teams",
-    noteKey: "organizationCount",
-    note: "organizations",
   },
   {
     label: "Organizations",
-    key: "myOrganizations",
-    fallbackKeys: ["organizationCount"],
     icon: Building2,
     color: "orange",
-    path: "/organizations",
-    note: "Active",
+    path:"/organizations"
   },
 ];
 

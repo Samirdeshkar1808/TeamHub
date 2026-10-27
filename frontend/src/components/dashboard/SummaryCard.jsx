@@ -1,16 +1,13 @@
 import { ChevronRight } from "lucide-react";
 import { colors } from "../../config/dashboardConfig";
-import { getCount } from "../../utils/dashboardHelpers";
 
 export default function SummaryCard({ item, summary, navigate }) {
   const Icon = item.icon;
   const style = colors[item.color];
 
-  const count = getCount(summary, [item.key, ...(item.fallbackKeys || [])]);
+  const count = item.key ? summary?.[item.key] : null;
 
-  const noteCount = item.noteKey
-    ? getCount(summary, [item.noteKey])
-    : null;
+  const noteCount = item.noteKey ? summary ?.[item.noteKey] : null;
 
   return (
     <button
@@ -34,7 +31,7 @@ export default function SummaryCard({ item, summary, navigate }) {
       </p>
 
       <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">
-        {count === null ? "—" : count}
+        {count === null ? "-" : count}
       </p>
 
       <p className="mt-2 text-xs text-slate-500">
