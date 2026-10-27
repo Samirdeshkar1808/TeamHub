@@ -11,6 +11,8 @@ import OrganizationDetails from "./pages/OrganizationDetails";
 import Teams from "./pages/MyTeams";
 import TeamDetails from "./pages/MyTeamDetails";
 import TeamWorkspace from "./pages/TeamWorkspace";
+import AllTasks from "./pages/AllTasks";
+import AllRequests from "./pages/AllRequests";
 const App = () =>{
 
   return(
@@ -27,6 +29,8 @@ const App = () =>{
         <Route path="/teams" element={<Teams/>} />
         <Route path="/teams/:teamId" element={<TeamDetails/>} />
         <Route path="/teams/:teamId/workspace" element={<TeamWorkspace />}/>
+        <Route path="/tasks" element={<AllTasks/>} />
+        <Route path="/requests" element={<AllRequests/>} />
       </Route>
       
     </Routes> 
