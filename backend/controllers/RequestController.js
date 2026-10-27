@@ -474,3 +474,41 @@ export const assignRequestMember = async (req, res) => {
   }
 };
 
+//GET  /dashboard/getAllRequests
+//only Admin or Owner can access
+
+export const getAllRequests = async(req,res) =>{
+
+  const {organizationId} = req.params;
+  const userId = req.user._id;
+
+  try{
+     
+    const membership = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : userId});
+
+    if(!membership){
+      return res.status(400).json({
+        message : 'Organization Membership Not Found'
+      });
+    }
+
+    if(!['Owner' , 'Admin'].includes(membership.role)){
+      return res.status(403).json({
+        message : "All requests can be accessed by Admin/Owner only"
+      });
+    }
+
+    const allrequests = await Request.find({organization_Id : organizationId}).populate('from_Team','name').populate('to_Team', 'name').populate('created_By', 'name email')
+                                       .sort({ createdAt: -1 }).lean();
+    
+    return  res.status(200).json({
+      allrequests
+    })                          
+  }
+  catch(err){
+    res.status(400).json({
+      message : "Failed to fetch all requests."
+    })
+  }
+
+}
