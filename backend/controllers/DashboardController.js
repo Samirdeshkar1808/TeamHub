@@ -199,6 +199,7 @@ export const getOrganizationInfo = async(req, res) => {
 
     return res.status(200).json({
       organization,
+      userMembership : membership,
       members,
     });
   } catch (err) {

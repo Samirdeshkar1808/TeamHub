@@ -112,8 +112,7 @@ function TeamDetails() {
       setError("Select a team member first.");
       return;
     }
-
-    console.log(newHeadUserId);
+    
     const selectedMember = members.find(
       (member) =>
         String(member.user?._id || member.user?.id) === newHeadUserId
@@ -336,7 +335,7 @@ function TeamDetails() {
               })
             ) : (
               <div className="p-8 text-center text-sm text-gray-500">
-                No member details were returned for this team.
+                No members found.
               </div>
             )}
           </div>
@@ -351,7 +350,10 @@ function TeamDetails() {
               <div>
                 <h2 className="font-semibold text-gray-900">Add a member</h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  Add an existing user using their registered email.
+                  Add an existing organization user using their registered email.
+                </p>
+                <p className="mt-1 text-sm text-gray-400">
+                  Note: Add user to organization before adding to Team.Use organization panel.
                 </p>
               </div>
             </div>

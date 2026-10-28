@@ -263,7 +263,16 @@ export const addOrganizationMember = async(req,res) =>{
 
 export const removeOrganizationMember = async(req,res) =>{
     try{
-        const {organizationId , userId} = req.params;
+        const {organizationId} = req.params;
+        const {email} = req.body;
+        
+        const targetuserId  = await User.findOne({email : email});
+
+        if(!targetuserId){
+            return res.status(400).json({
+                message: "User does not a exist."
+            });
+        }
 
         const removerInfo = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : req.user._id});
 
@@ -273,7 +282,7 @@ export const removeOrganizationMember = async(req,res) =>{
             });
         };
 
-        const targetUser = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : userId});
+        const targetUser = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : targetuserId._id});
 
         if(!targetUser){
             return res.status(400).json({

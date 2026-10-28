@@ -192,7 +192,7 @@ export const getTeamById = async (req, res) => {
 
     if (!teamMembership && !isOrgAdmin) {
       return res.status(403).json({
-        message: 'You do not have access to this team',
+        message: 'You do not have access to this team. Only Team members or Admin can Access.',
       });
     }
 

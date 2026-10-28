@@ -1,6 +1,6 @@
 import {useState } from "react";
 import { Users, Settings, LogOut, X , Menu  } from "lucide-react";
-import { navigation } from "../config/dashboardConfig";
+import { sections } from "../config/dashboardConfig";
 import {useLocation, useNavigate } from "react-router-dom";
 
 export default function Sidebar(){
@@ -18,7 +18,7 @@ export default function Sidebar(){
 
   const pathSegments = location.pathname.split("/").filter(Boolean); 
   const activePath = pathSegments.length > 0 ? `/${pathSegments[0]}` : "/dashboard";
-
+  
   return (
     <> 
       <button
@@ -71,27 +71,38 @@ export default function Sidebar(){
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-5">
-          {navigation.map(({ label, icon: Icon, path }) => (
-            <button
-              type="button"
-              key={label}
-              onClick={() => {
-                navigate(path);
-                setMobileOpen(false);
-              }}
-              className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium transition ${
-                activePath === path
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-              }`}
-            >
-              <Icon size={19} strokeWidth={1.9} />
-              {label}
-            </button>
+          {sections.map((section, sectionIdx) => (
+            <div key={sectionIdx} className="space-y-1">
+              {section.title && (
+                <h4 className="px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                  {section.title}
+                </h4>
+              )}
+              {section.items.map(({ label, icon: Icon, path }) => (
+                <button
+                  type="button"
+                  key={label}
+                  onClick={() => {
+                    navigate(path);
+                    setMobileOpen(false);
+                  }}
+                  className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium transition ${
+                    activePath === path
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                >
+                  <Icon size={19} strokeWidth={1.9} />
+                  {label}
+                </button>
+              ))}
+
+              <hr className="border-slate-100 mx-2" />
+            </div>
           ))}
         </nav>
 
-        <div className="space-y-1 border-t border-slate-100 px-3 py-4">
+        <div className="space-y-1  px-3 py-4">
           <button
             type="button"
             onClick={() => {

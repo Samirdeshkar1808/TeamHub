@@ -16,7 +16,7 @@ router.get('/:organizationId' , authMiddleware , getOrganizationById);
 
 router.post('/:organizationId/members' , authMiddleware , addOrganizationMember);
 
-router.delete('/:organizationId/members/:userId' , authMiddleware , removeOrganizationMember);
+router.delete('/:organizationId/members' , authMiddleware , removeOrganizationMember);
 
 router.post('/:organizationId/teams' , authMiddleware , createTeam);
 router.get('/:organizationId/teams' , authMiddleware , getTeams);

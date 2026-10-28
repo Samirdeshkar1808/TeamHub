@@ -5,6 +5,7 @@ import { ArrowLeft, Building2, CalendarDays, User, UsersRound, AlertCircle, Load
 
 import organizationService from "../services/organizationService";
 import Sidebar from "../components/Sidebar";
+import { AddOrganizationMember , RemoveOrganizationMember } from "../components/organizations/OrganizationMember";
 
 function OrganizationDetails() {
   const { organizationId } = useParams();
@@ -15,6 +16,7 @@ function OrganizationDetails() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [role , setRole] = useState("")
 
   const [activeTab, setActiveTab] = useState(null);
 
@@ -31,13 +33,15 @@ function OrganizationDetails() {
         organizationService.getOrganizationInfoById(organizationId),
         organizationService.getTeams(organizationId).catch(() => []),
       ]);
-
+      
+      console.log(org);
       console.log(org.members);
       console.log(allTeams);
 
       setOrganization(org.organization);
       setTeams(allTeams);
       setMembers(org.members);
+      setRole(org.userMembership.role);
     }catch(err) {
       setError(
         err.response?.data?.message ||
@@ -92,7 +96,7 @@ function OrganizationDetails() {
       })
     : "—";
 
-  const role = organization.role || "Member";
+  const canManage = role === "Admin" || role === "Owner";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -266,6 +270,26 @@ function OrganizationDetails() {
           )}
         </div>
       )}
+
+        {canManage && (
+          <section className="mt-10 pt-6 border-t border-gray-200">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold text-gray-900">Member Management</h2>
+              <p className="mt-1 text-sm text-gray-500">Add or remove users from this organization.</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <AddOrganizationMember 
+                organizationId={organizationId} 
+                onSuccess={loadDetails} 
+              />
+              <RemoveOrganizationMember 
+                organizationId={organizationId} 
+                onSuccess={loadDetails} 
+              />
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
