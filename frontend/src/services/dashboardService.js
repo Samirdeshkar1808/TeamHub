@@ -2,13 +2,14 @@ import api from "./axiosApi";
 
 export async function fetchDashboardData(){
   try{
-    const results = await api.get('/dashboard/summary');
+    const response = await api.get('/dashboard/summary');
 
-    return results;
+    return {data: response.data, err: null };
 
   }catch(err){
-    return {
-      err
+    return { 
+      data: null, 
+      err: err.response?.data || err.message || "Failed to fetch dashboard data" 
     };
   }
 

@@ -1,15 +1,12 @@
-import {useState } from "react";
+import {useState , useEffect } from "react";
 import {useNavigate } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
 import SummaryCards from "../components/dashboard/SummaryCards";
 import TeamOrganizationPanel from "../components/dashboard/TeamOrganizationPanel";
-import QuickActions from "../components/dashboard/QuickActions";
 
-import { useCallback } from "react";
 import { fetchDashboardData } from "../services/dashboardService";
-import { useEffect } from "react";
 
 export default function Dashboard() {
   const [summary , setSummary] = useState({});
@@ -19,28 +16,25 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("teams");
 
-  const loadSummary = useCallback(async ()=>{
-    setLoading(true);
-    setError("");
-
-    try{
-      const results = await fetchDashboardData();
-      if(results.err) {
-        throw new Error(results.err.message || "Failed to fetch dashboard data");
-      }
-      setSummary(results.data.summary);
-    }
-    catch(err){
-      setError(err.message || "Unable to load dashboard information.");
-    }
-    finally{
-      setLoading(false);
-    }
-  } , []);
-
   useEffect(()=>{
-   loadSummary()
-  },[loadSummary]);
+
+    const loadSummary = async ()=>{
+      setLoading(true);
+      setError("");
+     
+      const results = await fetchDashboardData();
+
+      if(results.err) {
+       setError(results.err);
+      }else{
+       setSummary(results.data.summary);
+      }
+     
+      setLoading(false);
+    };
+    
+    loadSummary();
+  },[]);
   
   const firstName = summary.user?.name?.trim()?.split(/\s+/)[0] || "there";
 
@@ -97,9 +91,7 @@ export default function Dashboard() {
               navigate={navigate}
               loading={loading}
             />
-      
 
-          <QuickActions navigate={navigate} />
         </main>
       </div>
     </div>
