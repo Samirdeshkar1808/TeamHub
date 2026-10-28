@@ -305,7 +305,7 @@ export const removeOrganizationMember = async(req,res) =>{
                 const organizationTeams = await Team.find({organization_Id: organizationId}).select('_id');
                 const teamIds = organizationTeams.map((team) => team._id);
 
-                const isHead = await TeamMembership.exists({team_Id:{ $in : teamIds}, user_Id: userId, role:'Head'});
+                const isHead = await TeamMembership.exists({team_Id:{ $in : teamIds}, user_Id: targetuserId._id, role:'Head'});
 
                 if(isHead){
                   return res.status(400).json({
@@ -313,7 +313,7 @@ export const removeOrganizationMember = async(req,res) =>{
                   });
                 }
 
-                await TeamMembership.deleteMany({user_Id : userId , team_Id : {$in : teamIds}} , {session});
+                await TeamMembership.deleteMany({user_Id : targetuserId._id , team_Id : {$in : teamIds}} , {session});
 
                 await OrganizationMembership.deleteOne({_id : targetUser._id} , {session});
             });
