@@ -10,11 +10,9 @@ import User from "../models/User.js";
 // POST  /teams    Create a team and assign its Team Head
 export const createTeam = async(req , res) =>{
 
-    const {name , description = '', headUserId} = req.body;
+    const {name , description = '', headEmail} = req.body;
     const {organizationId} = req.params;
-
-    console.log(organizationId);
-
+    
     if (!name || typeof name !== 'string') {
       return res.status(400).json({ message: 'Team name is required as String' });
     }
@@ -29,8 +27,8 @@ export const createTeam = async(req , res) =>{
       });
     }
 
-    if(!headUserId){
-        return res.status(400).json({ message: 'Head name is required' });
+    if(!headEmail || typeof headEmail !== 'string'){
+        return res.status(400).json({ message: 'Head Email is required' });
     }
 
     const session = await mongoose.startSession();
@@ -51,11 +49,19 @@ export const createTeam = async(req , res) =>{
             });
         }
 
-        const headMembership = await OrganizationMembership.findOne({ organization_Id: organizationId, user_Id: headUserId});
+        const headUser = await User.findOne({email : headEmail.toLowerCase().trim()});
+
+        if(!headUser){
+          return res.status(404).json({
+            message: 'User Not Found. Please check entered Email or try again',
+          });
+        }
+
+        const headMembership = await OrganizationMembership.findOne({ organization_Id: organizationId , user_Id : headUser._id});
 
         if (!headMembership){ 
             return res.status(400).json({
-                message: 'The selected Team Head does not exist or does not belong to this organization'
+              message: 'The selected Team Head does not belong to this organization'
             });
         }
 
@@ -71,14 +77,14 @@ export const createTeam = async(req , res) =>{
                   organization_Id: organizationId,
                   created_By: req.user._id,
                 },
-             ],{ session }
+             ],{session}
             );
 
             await Teammember.create(
              [
                 {
                    team_Id: team._id,
-                   user_Id: headUserId,
+                   user_Id: headUser._id,
                    role: 'Head',
                 }
              ],{ session }
@@ -96,7 +102,7 @@ export const createTeam = async(req , res) =>{
                description: createdTeam.description,
                organization_Id: createdTeam.organization_Id,
                created_By: createdTeam.created_By,
-               headUserId,
+               head : headUser.email,
                createdAt: createdTeam.createdAt,
             }
         });

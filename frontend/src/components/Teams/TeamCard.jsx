@@ -1,6 +1,5 @@
 import { Users, ChevronRight, Crown } from "lucide-react";
 function TeamCard({ team, onClick }) {
-  console.log(team);
   const headName = team.head?.name || "Not specified";
 
   return (
