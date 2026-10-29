@@ -198,7 +198,10 @@ export const getTeamById = async (req, res) => {
 
     const members = await Teammember.find({team_Id: team._id}).populate('user_Id', 'name email').sort({ role: 1, joinedAt: 1 }).lean();
 
+    const canManage = isOrgAdmin || teamMembership?.role == 'Head' ;
+
     return res.status(200).json({
+      canManage,
       team,
       members: members.map((membership) => ({
         user: membership.user_Id,
