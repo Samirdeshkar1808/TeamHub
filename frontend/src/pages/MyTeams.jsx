@@ -19,6 +19,7 @@ function Teams() {
   const [showCreate, setShowCreate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [onlyMyTeams , setOnlyMyTeams] = useState(false);
 
   const loadOrganizations = useCallback(async () => {
     const data = await teamService.getOrganizations();
@@ -50,7 +51,7 @@ function Teams() {
     setError("");
 
     try{
-      const data = await teamService.getTeams(organizationId);
+      const data = onlyMyTeams ? await teamService.getMyTeams(organizationId) : await teamService.getTeams(organizationId);
       setTeams(data);
     } catch (err) {
       setTeams([]);
@@ -62,7 +63,7 @@ function Teams() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [onlyMyTeams]);
 
   useEffect(() => {
     let active = true;
@@ -202,10 +203,35 @@ function Teams() {
               </option>
             ))}
           </select>
+          <div className="inline-flex items-center gap-1 rounded-2xl border border-gray-200 bg-white mx-2 p-1.5 shadow-sm">
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 px-3">
+              Show : 
+            </span>
+            <button
+              type="button"
+              onClick={() => setOnlyMyTeams(true)}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                onlyMyTeams ? "bg-gray-100 text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-900"
+                }`}
+              >
+              My Teams
+              </button>
+              <button
+                type="button"
+                onClick={() => setOnlyMyTeams(false)}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                  !onlyMyTeams 
+                    ? "bg-gray-100 text-gray-900 shadow-sm" 
+                    : "text-gray-900 hover:text-gray-900"
+                }`}
+              >
+                All Teams
+            </button>
+          </div>
 
           {selectedOrganization && (
             <p className="mt-3 text-sm text-gray-500">
-              Showing teams for{" "}
+              Showing {onlyMyTeams ? "Your" : "All"} teams in {" "}
               <span className="font-medium text-gray-800">
                 {selectedOrganization.name}
               </span>

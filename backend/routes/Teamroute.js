@@ -9,7 +9,7 @@ import { createTask , getTasks } from '../controllers/TaskController.js';
 
 import { createRequest, getRequests} from '../controllers/RequestController.js';
 
-router.get('/' , authMiddleware , getMyTeams);
+router.post('/' , authMiddleware , getMyTeams);
 router.get('/:teamId' , authMiddleware , getTeamById);
 router.post('/:teamId/members' , authMiddleware, addTeamMember);
 router.delete('/:teamId/members/:userId',authMiddleware , removeTeamMember);

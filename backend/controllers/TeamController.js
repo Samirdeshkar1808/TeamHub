@@ -436,11 +436,15 @@ export const getMyTeams = async(req,res) =>{
 
   try{
 
-    const Teammemberships = await Teammember.find({user_Id : req.user._id}).populate('team_Id');
+    const { organizationId } = req.body;
+    
+    //only users selected organization_Id teams will be returned.
+    const Teammemberships = await Teammember.find({user_Id : req.user._id}).populate({path: 'team_Id', match: { organization_Id: organizationId }});
 
-    const teams = Teammemberships.filter((membership) => membership.team_Id)
+    const teams = Teammemberships.filter((membership) => membership.team_Id) // Removes null (non-matching or deleted teams)
                                  .map((membership) =>({
                                     id: membership.team_Id._id,
+                                    organizationId : membership.team_Id.organization_Id,
                                     name: membership.team_Id.name,
                                     description: membership.team_Id.description,
                                     role: membership.role,
