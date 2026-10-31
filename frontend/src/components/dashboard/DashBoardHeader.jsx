@@ -30,7 +30,7 @@ export default function DashboardHeader({user,navigate }) {
         <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block" />
         <button
           type="button"
-          onClick={() => navigate("/settings")}
+          onClick={() => navigate("/profile")}
           className="group flex items-center gap-3 rounded-2xl p-1.5 pr-3 text-left transition-all hover:bg-slate-100 active:scale-98"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-sm font-bold text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">

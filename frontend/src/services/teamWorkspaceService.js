@@ -9,7 +9,7 @@ const teamWorkspaceService = {
 
   getTeamTasks: async (teamId) => {
     const response = await api.get(`/teams/${teamId}/tasks`);
-    return response;
+    return response.data;
   },
 
   createTask: async (teamId, taskData) => {

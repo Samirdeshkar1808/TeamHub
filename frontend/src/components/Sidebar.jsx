@@ -1,5 +1,5 @@
 import {useState } from "react";
-import { Users, Settings, LogOut, X , Menu  } from "lucide-react";
+import { Users,UserRound, LogOut, X , Menu  } from "lucide-react";
 import { sections } from "../config/dashboardConfig";
 import {useLocation, useNavigate } from "react-router-dom";
 
@@ -107,12 +107,16 @@ export default function Sidebar(){
             type="button"
             onClick={() => {
               setMobileOpen(false);
-              navigate("/settings");
+              navigate("/profile");
             }}
-            className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-600 hover:bg-slate-50"
+            className= {`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium transition ${
+              activePath === '/profile'
+                ? "bg-blue-50 text-blue-700" 
+                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            }`}
           >
-            <Settings size={19} />
-            Settings
+            <UserRound size={19} />
+            My Profile 
           </button>
 
           <button
