@@ -290,6 +290,10 @@ export const removeOrganizationMember = async(req,res) =>{
             });
         }
 
+        if(targetUser.role === 'Owner'){
+            return res.status(400).json({message : "Owner can't be removed."});
+        }
+
         if(targetUser.role === 'Admin' && removerInfo.role !== 'Owner'){
             return res.status(400).json({message : "Only Owner can remove Admin"});
         }

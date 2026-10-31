@@ -2,7 +2,6 @@ import express from 'express'
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
-import authMiddleware from './middleware/authmiddleware.js';
 import authroute from './routes/authroute.js';
 import organizationroute from './routes/organizationroute.js'
 import Teamroute from './routes/Teamroute.js';

@@ -148,20 +148,17 @@ export default function TeamRequestsPanel({ teamId, teamData }) {
     }
   }
 
+  const normalizeStatus = (status) => String(status || "").trim().toLowerCase().replace(/[\s_-]/g, "");
+
   const visibleRequests = requests.filter((request) => {
-    const incoming =
-      String(request.to_Team?._id || request.to_Team) === teamId;
-    const outgoing =
-      String(request.from_Team?._id || request.from_Team) === teamId;
+    const incoming = String(request.to_Team?._id || request.to_Team) === String(teamId);
+    const outgoing = String(request.from_Team?._id || request.from_Team) === String(teamId);
 
-    const matchesDirection =
-      direction === "all" ||
-      (direction === "incoming" && incoming) ||
-      (direction === "outgoing" && outgoing);
+    const matchesDirection = direction === "all" || (direction === "incoming" && incoming) ||
+                             (direction === "outgoing" && outgoing);
 
-    const matchesStatus =
-      statusFilter === "All" || request.status === statusFilter;
-
+    const matchesStatus = statusFilter === "All" || normalizeStatus(request.status) === normalizeStatus(statusFilter);
+    
     return matchesDirection && matchesStatus;
   });
 

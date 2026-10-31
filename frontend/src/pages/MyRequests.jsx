@@ -57,14 +57,19 @@ export default function MyRequests() {
 
   })
 
-  const visibleRequests = useMemo(() => {
-    const filtered = requests.filter((request) =>{
-      
-      const query = search.trim().toLowerCase();
+  
+const visibleRequests = useMemo(() => {
+  const filtered = requests.filter((request) => {
+    // Status filter
+    const matchesStatus =
+      statusFilter === "All" || request.status === statusFilter;
 
-     if(!query) return true;
+    // Search filter
+    const query = search.trim().toLowerCase();
 
-      return [
+    const matchesSearch =
+      !query ||
+      [
         request.title,
         request.description,
         request.from_Team?.name,
@@ -75,12 +80,15 @@ export default function MyRequests() {
       ]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(query));
-    });
 
-    return filtered.sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-  }, [requests, search]);
+    return matchesStatus && matchesSearch;
+  });
+
+  return filtered.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+}, [requests, search, statusFilter]);
+
 
 
   async function makeDecision(request, status) {
