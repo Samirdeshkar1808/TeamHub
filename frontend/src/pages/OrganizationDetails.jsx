@@ -33,10 +33,6 @@ function OrganizationDetails() {
         organizationService.getOrganizationInfoById(organizationId),
         organizationService.getTeams(organizationId).catch(() => []),
       ]);
-      
-      console.log(org);
-      console.log(org.members);
-      console.log(allTeams);
 
       setOrganization(org.organization);
       setTeams(allTeams);

@@ -332,7 +332,7 @@ function TeamDetails() {
                         {member.role || "Member"}
                       </span>
 
-                      {!isHead && (
+                      {canManage && !isHead && (
                         <button
                           type="button"
                           disabled={working || !userId}

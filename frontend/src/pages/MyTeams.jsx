@@ -203,7 +203,7 @@ function Teams() {
               </option>
             ))}
           </select>
-          <div className="inline-flex items-center gap-1 rounded-2xl border border-gray-200 bg-white mx-2 p-1.5 shadow-sm">
+          <div className="inline-flex items-center gap-1 rounded-2xl border border-gray-200 bg-white mx-2 mt-0.5 p-1.5 shadow-sm">
             <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 px-3">
               Show : 
             </span>
