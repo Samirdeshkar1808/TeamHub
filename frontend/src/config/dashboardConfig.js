@@ -1,32 +1,39 @@
 
-import {
-  LayoutDashboard,
-  CheckSquare,
-  ArrowLeftRight,
-  Building2,
-  Users,
-  ListTodo,
-  FileText,
-  CheckCircle2,
-  PlusCircle,
-  UserRoundPlus,
-} from "lucide-react";
+import {LayoutDashboard, CheckSquare, ArrowLeftRight, Building2, Users, ListTodo, FileText, CheckCircle2, PlusCircle, UserRoundPlus} from "lucide-react";
 
-export const navigation = [
+const navigation = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
   { label: "My Tasks", icon: CheckSquare, path: "/my-tasks" },
   { label: "My Requests", icon: ArrowLeftRight, path: "/my-requests" },
   { label: "Organizations", icon: Building2, path: "/organizations" },
   { label: "Teams", icon: Users, path: "/teams" },
-  { label: "Tasks", icon: ListTodo, path: "/tasks" },
-  { label: "Requests", icon: FileText, path: "/requests" },
+  { label: "All Tasks", icon: ListTodo, path: "/tasks" },
+  { label: "All Requests", icon: FileText, path: "/requests" },
 ];
+
+export const sections = [
+    {
+      title: null, // for Dashboard
+      items: navigation.slice(0, 1),
+    },
+    {
+      title: "My Workspace",
+      items: navigation.slice(1, 3),
+    },
+    {
+      title: "Management",
+      items: navigation.slice(3, 5),
+    },
+    {
+      title: "Admin",
+      items: navigation.slice(5),
+    },
+  ];
 
 export const summaryCards = [
   {
     label: "My Tasks",
-    key: "myTasks",
-    fallbackKeys: ["totalTasks", "assignedTasks"],
+    key: "assignedTasks",
     icon: CheckCircle2,
     color: "blue",
     path: "/my-tasks",
@@ -36,31 +43,21 @@ export const summaryCards = [
   {
     label: "My Requests",
     key: "myRequests",
-    fallbackKeys: ["totalRequests", "requests"],
     icon: ArrowLeftRight,
     color: "purple",
     path: "/my-requests",
-    noteKey: "pendingRequests",
-    note: "pending",
   },
   {
-    label: "My Teams",
-    key: "myTeams",
-    fallbackKeys: ["teamsCount", "teamCount"],
+    label: "Teams",
     icon: Users,
     color: "green",
     path: "/teams",
-    noteKey: "organizationCount",
-    note: "organizations",
   },
   {
     label: "Organizations",
-    key: "myOrganizations",
-    fallbackKeys: ["organizationCount"],
     icon: Building2,
     color: "orange",
-    path: "/organizations",
-    note: "Active",
+    path:"/organizations"
   },
 ];
 

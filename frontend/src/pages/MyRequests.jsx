@@ -25,6 +25,7 @@ export default function MyRequests() {
   const [expandedId, setExpandedId] = useState("");
   const [decisionNotes, setDecisionNotes] = useState({});
   const [noteTarget, setNoteTarget] = useState("");
+  const [completed , setCompleted] = useState(null);
 
   const loadRequests = useCallback(async () => {
 
@@ -37,6 +38,10 @@ export default function MyRequests() {
       const list = response.data.requests;
 
       setRequests(list);
+
+      const completedCount = list.filter((req) => req.status?.toLowerCase() === "completed").length;
+      setCompleted(completedCount);
+
     }catch(error) {
       setPageError(getErrorMessage(error));
     } finally {
@@ -48,14 +53,23 @@ export default function MyRequests() {
     loadRequests();
   }, [loadRequests]);
 
-  const visibleRequests = useMemo(() => {
-    const filtered = requests.filter((request) =>{
-      
-      const query = search.trim().toLowerCase();
+  useEffect(()=>{
 
-     if(!query) return true;
+  })
 
-      return [
+  
+const visibleRequests = useMemo(() => {
+  const filtered = requests.filter((request) => {
+    // Status filter
+    const matchesStatus =
+      statusFilter === "All" || request.status === statusFilter;
+
+    // Search filter
+    const query = search.trim().toLowerCase();
+
+    const matchesSearch =
+      !query ||
+      [
         request.title,
         request.description,
         request.from_Team?.name,
@@ -66,12 +80,15 @@ export default function MyRequests() {
       ]
         .filter(Boolean)
         .some((value) => value.toLowerCase().includes(query));
-    });
 
-    return filtered.sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-  }, [requests, search]);
+    return matchesStatus && matchesSearch;
+  });
+
+  return filtered.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+}, [requests, search, statusFilter]);
+
 
 
   async function makeDecision(request, status) {
@@ -187,15 +204,15 @@ export default function MyRequests() {
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SummaryCard
             icon={<Inbox size={20} />}
-            label="Total Requests"
-            value={requests.length}
+            label="Assigned Requests"
+            value={requests.length - completed}
             iconClass="bg-violet-50 text-violet-700"
           />
 
           <SummaryCard
             icon={<Send size={20} />}
             label="Completed Request"
-            value={0}
+            value={completed}
             iconClass="bg-blue-50 text-blue-700"
           />
         </div>

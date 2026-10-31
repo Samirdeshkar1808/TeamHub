@@ -1,7 +1,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ClipboardList, Send } from "lucide-react";
+import { ArrowLeft, ClipboardList, Send , AlertCircle} from "lucide-react";
 
 import teamWorkspaceService from "../services/teamworkspaceService";
 import TeamTasksPanel from "../components/Teams/TeamTasksPanel";
@@ -20,6 +20,7 @@ export default function TeamWorkspace() {
   const [activeTab, setActiveTab] = useState("tasks");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [canManage , setCanManage] = useState(false);
 
   const loadTeam = useCallback(async () => {
     setLoading(true);
@@ -28,6 +29,8 @@ export default function TeamWorkspace() {
     try {
       const result = await teamWorkspaceService.getTeam(teamId);
       setTeamData(result);
+      setCanManage(result.canManage);
+
     } catch (err) {
       setError(
         err.response?.data?.message || "Unable to load this team workspace."
@@ -49,27 +52,36 @@ export default function TeamWorkspace() {
     );
   }
 
-  if (error || !teamData?.team) {
+  const permissionError = !canManage ? "Workspace can be accessed by Team Head and Admin/Owner only." : null;
+
+  const displayError = error || permissionError;
+
+  if (displayError || !teamData?.team) {
     return (
-      <div className="space-y-4 p-6">
-        <Link
-          to="/teams"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
-        >
-          <ArrowLeft size={16} />
-          Back to teams
-        </Link>
+      <div className="min-h-screen bg-gray-50 px-4 py-12">
+        <div className="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white p-8">
+          <AlertCircle size={28} className="text-red-500" />
+          <h1 className="mt-4 text-xl font-semibold text-gray-900">
+            Access Denied
+          </h1>
+          <p className="mt-2 text-sm text-gray-700">{displayError}</p>
 
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error || "Team not found."}
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={loadTeam}
+              className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium hover:bg-gray-50"
+            >
+              Try again
+            </button>
+
+            <button
+              onClick={() => navigate("/teams")}
+              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Back to teams
+            </button>
+          </div>
         </div>
-
-        <button
-          onClick={loadTeam}
-          className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-        >
-          Try again
-        </button>
       </div>
     );
   }

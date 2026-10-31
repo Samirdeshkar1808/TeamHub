@@ -14,6 +14,12 @@ const teamService = {
     return response.data.teams ?? [];
   },
 
+  async getMyTeams(organizationId){
+    const response = await api.post('/teams' , {organizationId});
+
+    return response.data.teams ?? [];
+  },
+
   async createTeam(organizationId, data) {
     const response = await api.post(
       `/organizations/${organizationId}/teams`,

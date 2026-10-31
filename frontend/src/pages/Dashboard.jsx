@@ -1,21 +1,42 @@
-import {useState } from "react";
-import {useLocation, useNavigate } from "react-router-dom";
+import {useState , useEffect } from "react";
+import {useNavigate } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
 import SummaryCards from "../components/dashboard/SummaryCards";
 import TeamOrganizationPanel from "../components/dashboard/TeamOrganizationPanel";
-import QuickActions from "../components/dashboard/QuickActions";
 
-import useDashboard from "../hooks/useDashboard";
+import { fetchDashboardData } from "../services/dashboardService";
 
 export default function Dashboard() {
+  const [summary , setSummary] = useState({});
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
   const [tab, setTab] = useState("teams");
 
-  const {loading,error,summary,teams,organizations,user} = useDashboard();
+  useEffect(()=>{
+
+    const loadSummary = async ()=>{
+      setLoading(true);
+      setError("");
+     
+      const results = await fetchDashboardData();
+
+      if(results.err) {
+       setError(results.err);
+      }else{
+       setSummary(results.data.summary);
+      }
+     
+      setLoading(false);
+    };
+    
+    loadSummary();
+  },[]);
   
-  const firstName = user?.name?.trim()?.split(/\s+/)[0] || "there";
+  const firstName = summary.user?.name?.trim()?.split(/\s+/)[0] || "there";
 
   return(
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
@@ -23,7 +44,7 @@ export default function Dashboard() {
 
       <div className="min-h-screen lg:pl-64">
         <DashboardHeader
-          user={user}
+          user={summary.user}
           navigate={navigate}
         />
 
@@ -64,16 +85,13 @@ export default function Dashboard() {
           />
 
             <TeamOrganizationPanel
-              teams={teams}
-              organizations={organizations}
+              summary={summary}
               tab={tab}
               setTab={setTab}
               navigate={navigate}
               loading={loading}
             />
-      
 
-          <QuickActions navigate={navigate} />
         </main>
       </div>
     </div>

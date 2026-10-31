@@ -95,51 +95,56 @@ export default function TaskCard({
         </div>
 
         {/* Status update */}
-        {!readOnly && 
+        {!readOnly && (
           <div className="w-full shrink-0 lg:w-44">
-            <label
-             htmlFor={`status-${task._id}`}
-             className="mb-2 block text-xs font-semibold text-slate-600"
-            >
-             Update status
-            </label>
+          <label
+            htmlFor={`status-${task._id}`}
+            className="mb-2 block text-xs font-semibold text-slate-600"
+          >
+           Update status
+          </label>
 
-            <div className="relative">
-             <select
-              id={`status-${task._id}`}
-              value={task.status}
-              disabled={isUpdating}
-              onChange={(event) =>
-                onStatusChange(task._id, event.target.value)
-              }
-              className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 pr-9 text-sm font-medium outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-wait disabled:opacity-60"
-             >
-              {FILTERS.filter(
-                (filter) => filter.value !== "All"
-              ).map((filter) => (
-                <option
-                  key={filter.value}
-                  value={filter.value}
-                >
-                  {filter.label}
-                </option>
-              ))}
-             </select>
+          <div className="relative">
+           <select
+            id={`status-${task._id}`}
+            value={task.status}
+            disabled={isUpdating || task.status === "Done"}
+            onChange={(event) =>
+              onStatusChange(task._id, event.target.value)
+            }
+            className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 pr-9 text-sm font-medium outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-wait disabled:opacity-60"
+           >
 
-             {isUpdating && (
-              <LoaderCircle
-                size={16}
-                aria-label="Saving status"
-                className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-blue-600"
-              />
-             )}
-            </div>
+           <option value={task.status}>
+            {task.status === "Done" ? "Completed" : task.status}
+           </option>
 
-            <p className="mt-2 text-xs leading-5 text-slate-400">
-             Changes are saved to TeamHub.
-            </p>
+           {task.status === "Todo" && (
+            <option value="InProgress">In Progress</option>
+           )}
+
+           {task.status === "InProgress" && (
+            <option value="Done">Completed</option>
+           )}
+           </select>
+
+           {isUpdating && (
+            <LoaderCircle
+              size={16}
+              aria-label="Saving status"
+              className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-blue-600"
+            />
+           )}
           </div>
-        } 
+
+          <p className="mt-2 text-xs leading-5 text-slate-400">
+           {task.status === "Todo" && "Move this task to In Progress."}
+           {task.status === "InProgress" && "Mark this task as Completed."}
+           {task.status === "Done" && "This task is completed."}
+          </p>
+         </div>
+        )}
+
       </div>
     </article>
   );

@@ -39,7 +39,7 @@ export const signup = async(req,res) =>{
       });
     }
 
-    if(password < 8 || password > 72){
+    if(password.length < 8 || password.length > 72){
         return res.status(400).json({
           message: 'Password must be between 8 and 72 characters'
         });
@@ -105,7 +105,7 @@ export const login = async(req,res) =>{
         });
     }
 
-    const isPassCorrect = bcrypt.compare(password , user.password);
+    const isPassCorrect = await bcrypt.compare(password , user.password);
 
     if (!isPassCorrect) {
       return res.status(401).json({

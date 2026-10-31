@@ -263,7 +263,16 @@ export const addOrganizationMember = async(req,res) =>{
 
 export const removeOrganizationMember = async(req,res) =>{
     try{
-        const {organizationId , userId} = req.params;
+        const {organizationId} = req.params;
+        const {email} = req.body;
+        
+        const targetuserId  = await User.findOne({email : email});
+
+        if(!targetuserId){
+            return res.status(400).json({
+                message: "User does not a exist."
+            });
+        }
 
         const removerInfo = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : req.user._id});
 
@@ -273,12 +282,16 @@ export const removeOrganizationMember = async(req,res) =>{
             });
         };
 
-        const targetUser = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : userId});
+        const targetUser = await OrganizationMembership.findOne({organization_Id : organizationId , user_Id : targetuserId._id});
 
         if(!targetUser){
             return res.status(400).json({
                 message: "User is not a Organization Member."
             });
+        }
+
+        if(targetUser.role === 'Owner'){
+            return res.status(400).json({message : "Owner can't be removed."});
         }
 
         if(targetUser.role === 'Admin' && removerInfo.role !== 'Owner'){
@@ -296,7 +309,7 @@ export const removeOrganizationMember = async(req,res) =>{
                 const organizationTeams = await Team.find({organization_Id: organizationId}).select('_id');
                 const teamIds = organizationTeams.map((team) => team._id);
 
-                const isHead = await TeamMembership.exists({team_Id:{ $in : teamIds}, user_Id: userId, role:'Head'});
+                const isHead = await TeamMembership.exists({team_Id:{ $in : teamIds}, user_Id: targetuserId._id, role:'Head'});
 
                 if(isHead){
                   return res.status(400).json({
@@ -304,7 +317,7 @@ export const removeOrganizationMember = async(req,res) =>{
                   });
                 }
 
-                await TeamMembership.deleteMany({user_Id : userId , team_Id : {$in : teamIds}} , {session});
+                await TeamMembership.deleteMany({user_Id : targetuserId._id , team_Id : {$in : teamIds}} , {session});
 
                 await OrganizationMembership.deleteOne({_id : targetUser._id} , {session});
             });
