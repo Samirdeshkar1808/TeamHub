@@ -52,6 +52,13 @@ app.use('/dashboard' , dashboardroutes);
 
 app.use('/profile', userroutes);
 
+//health route
+app.get('/health' , (req,res)=>{
+    return res.status(200).json({
+        messsage : "UP"
+    });
+});
+
 app.listen(port , ()=>{
     console.log(`App is listening on ${port}`);
 });
