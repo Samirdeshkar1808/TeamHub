@@ -2,7 +2,7 @@ import {useState , useEffect } from "react";
 import {useNavigate } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
-import DashboardHeader from "../components/dashboard/DashboardHeader";
+import DashboardHeader from "../components/dashboard/DashBoardHeader";
 import SummaryCards from "../components/dashboard/SummaryCards";
 import TeamOrganizationPanel from "../components/dashboard/TeamOrganizationPanel";
 

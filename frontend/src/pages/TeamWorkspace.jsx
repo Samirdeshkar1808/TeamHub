@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ClipboardList, Send , AlertCircle} from "lucide-react";
 
-import teamWorkspaceService from "../services/teamworkspaceService";
+import teamWorkspaceService from "../services/teamWorkspaceService";
 import TeamTasksPanel from "../components/Teams/TeamTasksPanel";
 import TeamRequestsPanel from "../components/Teams/TeamRequestsPanel";
 import Sidebar from "../components/Sidebar";
