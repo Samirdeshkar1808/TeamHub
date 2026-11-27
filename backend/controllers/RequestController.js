@@ -228,7 +228,6 @@ export const assignedRequests = async(req,res)=>{
   try{  
     const requests = await Request.find({assigned_To : req.user._id}).populate('from_Team','name').populate('to_Team', 'name').populate('created_By', 'name email')
                                        .sort({ createdAt: -1 }).lean();
-
     if(!requests) {
       return res.status(404).json({message:'Requests not found'});
     }

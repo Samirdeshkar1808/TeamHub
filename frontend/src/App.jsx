@@ -13,6 +13,7 @@ import TeamDetails from "./pages/MyTeamDetails";
 import TeamWorkspace from "./pages/TeamWorkspace";
 import AllTasks from "./pages/AllTasks";
 import AllRequests from "./pages/AllRequests";
+import MyProfile from "./pages/MyProfile";
 const App = () =>{
 
   return(
@@ -31,6 +32,7 @@ const App = () =>{
         <Route path="/teams/:teamId/workspace" element={<TeamWorkspace />}/>
         <Route path="/tasks" element={<AllTasks/>} />
         <Route path="/requests" element={<AllRequests/>} />
+        <Route path="/profile" element={<MyProfile />} />
       </Route>
       
     </Routes> 

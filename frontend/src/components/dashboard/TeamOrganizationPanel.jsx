@@ -1,8 +1,9 @@
 import { Building2, ChevronRight, LoaderCircle, Users } from "lucide-react";
 import { getId, getName } from "../../utils/dashboardHelpers";
 
-export default function TeamOrganizationPanel({teams,organizations,tab,setTab,navigate,loading}) {
-  const items = tab === "teams" ? teams : organizations;
+export default function TeamOrganizationPanel({summary ,tab,setTab,navigate , loading}) {
+
+  const items = tab === "teams" ? summary.teamMemberships : summary.organizationMemberships;
 
   return (
     <section className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -15,8 +16,8 @@ export default function TeamOrganizationPanel({teams,organizations,tab,setTab,na
       </div>
 
       <div className="flex border-b border-slate-100 px-5 sm:px-6">
-        {[ {id:"teams",label: "My Teams",count: teams.length },
-           {id: "organizations",label: "My Organizations",count: organizations.length},
+        {[ {id:"teams",label: "My Teams",count: summary.myTeams },
+           {id: "organizations",label: "My Organizations",count: summary.myOrganizations},
         ].map((item)=>(
           <button 
             type="button"
@@ -34,12 +35,12 @@ export default function TeamOrganizationPanel({teams,organizations,tab,setTab,na
       </div>
 
       <div className="px-4 pb-3 sm:px-5">
-        {loading ? (
+        { loading ? (
           <div className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500">
             <LoaderCircle size={18} className="animate-spin" />
             Loading workspace...
           </div>
-        ) : items.length === 0 ? (
+        ) : items?.length == 0  ? (
           <div className="px-4 py-10 text-center">
             <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-slate-50 text-slate-500">
               {tab === "teams" ? <Users size={21} /> : <Building2 size={21} />}
@@ -54,16 +55,11 @@ export default function TeamOrganizationPanel({teams,organizations,tab,setTab,na
             </p>
           </div>
         ) : (
-          items.map((item) => {
+          items?.map((item) => {
             const id = getId(item);
             const name = getName(item);
 
-            const role =
-              item.role ||
-              item.membership?.role ||
-              item.myRole ||
-              item.userRole ||
-              "";
+            const role = item.role || "";
             
             return (
               <button
@@ -102,7 +98,7 @@ export default function TeamOrganizationPanel({teams,organizations,tab,setTab,na
                   </div>
 
                   <p className="mt-1 text-xs text-slate-500">
-                    {item.description ? `${item.description}`: ""}
+                    {item.organization_Id? `${item.organization_Id.description}` : item?.team_Id ?`${item.team_Id.description}` : "" }
                   </p>
                 </div>
 

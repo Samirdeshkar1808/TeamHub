@@ -10,11 +10,9 @@ import User from "../models/User.js";
 // POST  /teams    Create a team and assign its Team Head
 export const createTeam = async(req , res) =>{
 
-    const {name , description = '', headUserId} = req.body;
+    const {name , description = '', headEmail} = req.body;
     const {organizationId} = req.params;
-
-    console.log(organizationId);
-
+    
     if (!name || typeof name !== 'string') {
       return res.status(400).json({ message: 'Team name is required as String' });
     }
@@ -29,8 +27,8 @@ export const createTeam = async(req , res) =>{
       });
     }
 
-    if(!headUserId){
-        return res.status(400).json({ message: 'Head name is required' });
+    if(!headEmail || typeof headEmail !== 'string'){
+        return res.status(400).json({ message: 'Head Email is required' });
     }
 
     const session = await mongoose.startSession();
@@ -51,11 +49,19 @@ export const createTeam = async(req , res) =>{
             });
         }
 
-        const headMembership = await OrganizationMembership.findOne({ organization_Id: organizationId, user_Id: headUserId});
+        const headUser = await User.findOne({email : headEmail.toLowerCase().trim()});
+
+        if(!headUser){
+          return res.status(404).json({
+            message: 'User Not Found. Please check entered Email or try again',
+          });
+        }
+
+        const headMembership = await OrganizationMembership.findOne({ organization_Id: organizationId , user_Id : headUser._id});
 
         if (!headMembership){ 
             return res.status(400).json({
-                message: 'The selected Team Head does not exist or does not belong to this organization'
+              message: 'The selected Team Head does not belong to this organization'
             });
         }
 
@@ -71,14 +77,14 @@ export const createTeam = async(req , res) =>{
                   organization_Id: organizationId,
                   created_By: req.user._id,
                 },
-             ],{ session }
+             ],{session}
             );
 
             await Teammember.create(
              [
                 {
                    team_Id: team._id,
-                   user_Id: headUserId,
+                   user_Id: headUser._id,
                    role: 'Head',
                 }
              ],{ session }
@@ -96,7 +102,7 @@ export const createTeam = async(req , res) =>{
                description: createdTeam.description,
                organization_Id: createdTeam.organization_Id,
                created_By: createdTeam.created_By,
-               headUserId,
+               head : headUser.email,
                createdAt: createdTeam.createdAt,
             }
         });
@@ -192,13 +198,16 @@ export const getTeamById = async (req, res) => {
 
     if (!teamMembership && !isOrgAdmin) {
       return res.status(403).json({
-        message: 'You do not have access to this team',
+        message: 'You do not have access to this team. Only Team members or Admin can Access.',
       });
     }
 
     const members = await Teammember.find({team_Id: team._id}).populate('user_Id', 'name email').sort({ role: 1, joinedAt: 1 }).lean();
 
+    const canManage = isOrgAdmin || teamMembership?.role == 'Head' ;
+
     return res.status(200).json({
+      canManage,
       team,
       members: members.map((membership) => ({
         user: membership.user_Id,
@@ -427,11 +436,15 @@ export const getMyTeams = async(req,res) =>{
 
   try{
 
-    const Teammemberships = await Teammember.find({user_Id : req.user._id}).populate('team_Id');
+    const { organizationId } = req.body;
+    
+    //only users selected organization_Id teams will be returned.
+    const Teammemberships = await Teammember.find({user_Id : req.user._id}).populate({path: 'team_Id', match: { organization_Id: organizationId }});
 
-    const teams = Teammemberships.filter((membership) => membership.team_Id)
+    const teams = Teammemberships.filter((membership) => membership.team_Id) // Removes null (non-matching or deleted teams)
                                  .map((membership) =>({
                                     id: membership.team_Id._id,
+                                    organizationId : membership.team_Id.organization_Id,
                                     name: membership.team_Id.name,
                                     description: membership.team_Id.description,
                                     role: membership.role,

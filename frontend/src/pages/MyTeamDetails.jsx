@@ -17,6 +17,7 @@ function TeamDetails() {
   const [working, setWorking] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [canManage , setCanManage] = useState(false);
 
   const loadTeam = useCallback(async () => {
     setLoading(true);
@@ -27,6 +28,7 @@ function TeamDetails() {
 
       setTeam(data.team);
       setMembers(Array.isArray(data.members) ? data.members : []);
+      setCanManage(data.canManage);
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -112,8 +114,7 @@ function TeamDetails() {
       setError("Select a team member first.");
       return;
     }
-
-    console.log(newHeadUserId);
+    
     const selectedMember = members.find(
       (member) =>
         String(member.user?._id || member.user?.id) === newHeadUserId
@@ -159,7 +160,7 @@ function TeamDetails() {
         <div className="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white p-8">
           <AlertCircle size={28} className="text-red-500" />
           <h1 className="mt-4 text-xl font-semibold text-gray-900">
-            Unable to open team
+            Access Denied
           </h1>
           <p className="mt-2 text-sm text-gray-500">{error}</p>
 
@@ -208,6 +209,15 @@ function TeamDetails() {
           All teams
         </Link>
 
+        {!canManage && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 flex items-center gap-3">
+          <AlertCircle size={18} className="shrink-0 text-red-500" />
+          <span>
+            Management features are not visible as you are not an Team Head or Admin/Owner  .
+          </span>
+        </div>
+      )}
+
         <section className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
             <div className="flex items-start gap-4">
@@ -234,14 +244,17 @@ function TeamDetails() {
                   </span>
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-                  <Link to={`/teams/${team._id}/workspace`}
-                    className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
-                  >
-                   <BriefcaseBusiness size={17} />
-                   Open workspace
-                  </Link>
-                </div>
+                {canManage && (
+                  <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+                    <Link to={`/teams/${team._id}/workspace`}
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
+                    >
+                    <BriefcaseBusiness size={17} />
+                     Open workspace
+                    </Link>
+                  </div>
+                )}
+                
               </div>
             </div>
 
@@ -319,7 +332,7 @@ function TeamDetails() {
                         {member.role || "Member"}
                       </span>
 
-                      {!isHead && (
+                      {canManage && !isHead && (
                         <button
                           type="button"
                           disabled={working || !userId}
@@ -336,13 +349,14 @@ function TeamDetails() {
               })
             ) : (
               <div className="p-8 text-center text-sm text-gray-500">
-                No member details were returned for this team.
+                No members found.
               </div>
             )}
           </div>
         </section>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {canManage && (
+         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <section className="rounded-2xl border border-gray-200 bg-white p-6">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
@@ -351,7 +365,10 @@ function TeamDetails() {
               <div>
                 <h2 className="font-semibold text-gray-900">Add a member</h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  Add an existing user using their registered email.
+                  Add an existing organization user using their registered email.
+                </p>
+                <p className="mt-1 text-sm text-gray-400">
+                  Note: Add user to organization before adding to Team.Use organization panel.
                 </p>
               </div>
             </div>
@@ -379,7 +396,6 @@ function TeamDetails() {
               </button>
             </form>
           </section>
-
           <section className="rounded-2xl border border-gray-200 bg-white p-6">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-amber-50 p-3 text-amber-600">
@@ -388,7 +404,7 @@ function TeamDetails() {
               <div>
                 <h2 className="font-semibold text-gray-900">Transfer Team Head</h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  Assign leadership to another existing team member.
+                  Assign leadership to other existing team member.
                 </p>
               </div>
             </div>
@@ -433,7 +449,10 @@ function TeamDetails() {
               )}
             </form>
           </section>
-        </div>
+         </div>
+        )}
+
+         
       </main>
     </div>
   );

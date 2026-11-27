@@ -5,7 +5,7 @@ import { LoaderCircle, X } from "lucide-react";
 function CreateTeamModal({ onClose, onSubmit, submitting }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [headUserId, setHeadUserId] = useState("");
+  const [headEmail, setHeadEmail] = useState("");
   const [error, setError] = useState("");
 
   async function handleSubmit(event) {
@@ -16,8 +16,8 @@ function CreateTeamModal({ onClose, onSubmit, submitting }) {
       return;
     }
 
-    if (!headUserId.trim()) {
-      setError("Enter the user ID of the initial Team Head.");
+    if (!headEmail.trim()) {
+      setError("Enter the user email of the initial Team Head.");
       return;
     }
 
@@ -27,7 +27,7 @@ function CreateTeamModal({ onClose, onSubmit, submitting }) {
       await onSubmit({
         name: name.trim(),
         description: description.trim(),
-        headUserId: headUserId.trim(),
+        headEmail: headEmail.trim(),
       });
     } catch (err) {
       setError(
@@ -103,19 +103,19 @@ function CreateTeamModal({ onClose, onSubmit, submitting }) {
 
           <div>
             <label htmlFor="team-head-id" className="mb-2 block text-sm font-medium text-gray-700">
-              Initial Team Head user ID
+              Initial Team Head Email
             </label>
             <input
-              id="team-head-id"
-              value={headUserId}
-              onChange={(event) => setHeadUserId(event.target.value)}
+              id="team-head-email"
+              value={headEmail}
+              onChange={(event) => setHeadEmail(event.target.value)}
               required
-              placeholder="Paste the user's ID"
+              placeholder="Enter the user's Email"
               className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
             <p className="mt-2 text-xs leading-5 text-gray-500">
               The selected user must already belong to this organization.
-              You can find their ID in the organization member data.
+              You can find organization members in the organization member data.
             </p>
           </div>
 
