@@ -35,7 +35,7 @@ mongoose.connect(DBURL)
 
 //used to connect frontend and backend as both are on different ports.
 app.use(cors({
-  origin: "https://team-hub-tau-one.vercel.app",
+  origin: "https://team-hub-samir06.vercel.app",
   credentials: true,
 }));
 
