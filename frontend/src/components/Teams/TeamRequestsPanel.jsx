@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Plus, RefreshCw, Send, ArrowDownLeft } from "lucide-react";
 import api from "../../services/axiosApi";
-import teamWorkspaceService from "../../services/teamworkspaceService";
+import teamWorkspaceService from "../../services/teamWorkspaceService";
 
 const statuses = [
   "Pending",

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Plus, RefreshCw, ClipboardList } from "lucide-react";
-import teamWorkspaceService from "../../services/teamworkspaceService";
+import teamWorkspaceService from "../../services/teamWorkspaceService";
 
 const priorities = ["Low", "Medium", "High", "Urgent"];
 const statuses = ["Todo", "InProgress", "Cancelled", "Done"];
