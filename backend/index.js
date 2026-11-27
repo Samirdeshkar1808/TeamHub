@@ -34,7 +34,24 @@ mongoose.connect(DBURL)
 
 
 //used to connect frontend and backend as both are on different ports.
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://team-hub-tau-one.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 app.use('/auth', authroute);
 app.use('/organizations', organizationroute);
