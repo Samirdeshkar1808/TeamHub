@@ -32,8 +32,8 @@ export default function Sidebar(){
           <Users size={21} strokeWidth={2} />
         </div>
 
-        <span className="text-[21px] font-bold tracking-tight text-slate-900">
-            TeamHub
+        <span className="text-2xl font-bold tracking-tight text-gray-900">
+          Team<span className="text-indigo-600">Hub</span>
         </span>
       </button>
 

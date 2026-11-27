@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes , Route } from "react-router-dom";
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -14,10 +15,12 @@ import TeamWorkspace from "./pages/TeamWorkspace";
 import AllTasks from "./pages/AllTasks";
 import AllRequests from "./pages/AllRequests";
 import MyProfile from "./pages/MyProfile";
+import Landing from "./pages/Landing";
 const App = () =>{
 
   return(
     <Routes>
+      <Route path="/" element= {<Landing/>} />
       <Route path="/login" element={<Login/>} />
       <Route path="/signup" element={<Signup/>} />
 

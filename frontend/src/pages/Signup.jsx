@@ -105,8 +105,8 @@ export default function Signup() {
             <Users size={24} strokeWidth={2.4} />
           </span>
 
-          <span className="text-2xl font-bold tracking-tight text-slate-900">
-            TeamHub
+          <span className="text-2xl font-bold tracking-tight text-gray-900">
+            Team<span className="text-indigo-600">Hub</span>
           </span>
         </Link>
 
@@ -156,8 +156,8 @@ export default function Signup() {
               <Users size={22} />
             </span>
 
-            <span className="text-xl font-bold tracking-tight text-slate-900">
-              TeamHub
+            <span className="text-xl font-bold tracking-tight text-gray-900">
+             Team<span className="text-indigo-600">Hub</span>
             </span>
           </Link>
 
