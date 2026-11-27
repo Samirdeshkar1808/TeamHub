@@ -84,8 +84,8 @@ export default function Login() {
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
             <Users size={24} strokeWidth={2.4} />
           </span>
-          <span className="text-2xl font-bold tracking-tight text-slate-900">
-            TeamHub
+          <span className="text-2xl font-bold tracking-tight text-gray-900">
+            Team<span className="text-indigo-600">Hub</span>
           </span>
         </Link>
 
@@ -134,7 +134,7 @@ export default function Login() {
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
               <Users size={22} />
             </span>
-            <span className="text-xl font-bold tracking-tight text-slate-900">
+            <span className="text-2xl font-bold tracking-tight text-slate-900">
               TeamHub
             </span>
           </Link>

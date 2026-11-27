@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {CalendarDays,Check,Clock3,FileText,Inbox,LoaderCircle,MessageSquareText,ShieldAlert,ClipboardList,RefreshCw,Search,Send,X,XCircle} from "lucide-react";
 
 import api from "../services/axiosApi";
@@ -7,7 +7,6 @@ import { STATUSES , STATUS_LABELS , STATUS_STYLES , PRIORITY_STYLES} from "../co
 import { formatDateTime , getErrorMessage } from "../utils/myRequestsHelper";
 
 import EmptyState from "../components/myRequests/EmptyState";
-import ErrorBanner from "../components/myRequests/ErrorBanner";
 import Sidebar from "../components/Sidebar";
 import OrganizationSelector from "../components/AllTasks/OrganizationSelector";
 
@@ -21,7 +20,6 @@ export default function AllRequests() {
   const [organizationsLoading, setOrganizationsLoading] = useState(true);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [pageError, setPageError] = useState("");
-  const [actionError, setActionError] = useState("");
   const [expandedId, setExpandedId] = useState("");
 
   const pageLoading = organizationsLoading;
